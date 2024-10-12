@@ -1,27 +1,89 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* src/app/styles/globals.css */
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #1c1c1c; /* Fondo oscuro */
+  color: #ffffff; /* Texto blanco */
+  font-family: 'Arial', sans-serif;
+  margin: 0; /* Sin margen por defecto */
+  padding: 0; /* Sin padding por defecto */
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.hero-picker-container {
+  max-width: 600px;
+  margin: 50px auto; /* Centramos el contenedor */
+  padding: 20px; /* Padding interno */
+  background-color: rgba(50, 50, 50, 0.8); /* Fondo semi-transparente */
+  border-radius: 10px; /* Bordes redondeados */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Sombra del contenedor */
+}
+
+label {
+  font-size: 18px; /* Tamaño de fuente para las etiquetas */
+  margin-bottom: 8px; /* Espaciado inferior */
+}
+
+select {
+  width: 100%; /* Ancho completo */
+  padding: 10px; /* Padding interno */
+  margin-bottom: 20px; /* Espaciado inferior */
+  border-radius: 5px; /* Bordes redondeados */
+  border: 1px solid #444; /* Borde */
+  background-color: #333; /* Fondo del select */
+  color: #ffffff; /* Texto del select */
+  font-size: 16px; /* Tamaño de fuente */
+  transition: border-color 0.3s; /* Transición suave para el borde */
+}
+
+select:hover {
+  border-color: #888; /* Cambiar color de borde al pasar el mouse */
+}
+
+button {
+  padding: 10px 20px; /* Padding interno */
+  background-color: #007d00; /* Color verde Dota */
+  color: white; /* Texto blanco */
+  border: none; /* Sin borde */
+  border-radius: 5px; /* Bordes redondeados */
+  cursor: pointer; /* Cambiar cursor al pasar el mouse */
+  transition: background-color 0.3s; /* Transición suave para el fondo */
+}
+
+button:hover {
+  background-color: #005700; /* Color más oscuro al pasar el mouse */
+}
+
+.loader {
+  border: 4px solid rgba(255, 255, 255, 0.2); /* Borde claro semi-transparente */
+  border-radius: 50%; /* Forma circular */
+  border-top: 4px solid #007d00; /* Color verde en la parte superior */
+  width: 40px; /* Ancho */
+  height: 40px; /* Alto */
+  animation: spin 1s linear infinite; /* Animación de giro */
+  margin: 20px auto; /* Centrar el loader */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); } /* Giro inicial */
+  100% { transform: rotate(360deg); } /* Giro final */
+}
+
+.counter-picks {
+  margin-top: 20px; /* Espaciado superior */
+  padding: 10px; /* Padding interno */
+  background-color: #2a2a2a; /* Fondo para la sección de picks */
+  border-radius: 5px; /* Bordes redondeados */
+  line-height: 1.5; /* Espaciado entre líneas */
+}
+
+.counter-pick-item {
+  margin-bottom: 10px; /* Espacio entre cada héroe contra */
+  padding: 5px; /* Padding interno */
+  background-color: #3a3a3a; /* Fondo más claro para cada héroe */
+  border-radius: 3px; /* Bordes redondeados */
+}
+
+/* Opcional: Estilo para hacer el texto de respuesta un poco más grande */
+.counter-pick-item p {
+  margin: 0; /* Sin margen por defecto */
+  font-size: 16px; /* Tamaño de fuente para el texto */
 }
