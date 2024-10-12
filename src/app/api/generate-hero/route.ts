@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 150,
-      temperature: 0.1, // Ajustar la temperatura para respuestas más controladas
+      temperature: 0.0, // Ajustar la temperatura para respuestas más controladas
     });
 
     const counterPicks = response.choices[0].message.content.trim();
