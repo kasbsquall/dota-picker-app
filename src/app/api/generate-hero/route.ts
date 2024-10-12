@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       temperature: 0.0, // Ajustar la temperatura para respuestas más controladas
     });
 
-    const counterPicks = response.choices[0].message.content.trim();
+    const counterPicks = response.choices?.[0]?.message.content?.trim() || 'Sin héroes seleccionados';
     
     // Asegurarse de que se devuelven exactamente 3 héroes
     const picksArray = counterPicks.split('\n').map(pick => pick.trim()).filter(pick => pick);
