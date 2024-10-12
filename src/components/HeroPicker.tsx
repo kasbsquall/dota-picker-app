@@ -7,33 +7,33 @@ import { useState } from 'react';
 const heroes = [
   {
     name: 'Templar Assassin',
-    image: '/images/templar_assassin.png',
-    video: '/videos/templar_assassin.webm',
+    image: './images/templar_assassin.png',
+    video: './videos/templar_assassin.webm',
   },
   {
     name: 'Axe',
-    image: '/images/axe.png',
-    video: '/videos/axe.webm',
+    image: './images/axe.png',
+    video: './videos/axe.webm',
   },
   {
     name: 'Bane',
-    image: '/images/bane.png',
-    video: '/videos/bane.webm',
+    image: './images/bane.png',
+    video: './videos/bane.webm',
   },
   {
     name: 'Outworld Devourer',
-    image: '/images/outworld_destroyer.png',
-    video: '/videos/outworld_destroyer.webm',
+    image: './images/outworld_destroyer.png',
+    video: './videos/outworld_destroyer.webm',
   },
   {
     name: 'Pugna',
-    image: '/images/pugna.png',
-    video: '/videos/pugna.webm',
+    image: './images/pugna.png',
+    video: './videos/pugna.webm',
   },
   {
     name: 'Viper',
-    image: '/images/viper.png',
-    video: '/videos/viper.webm',
+    image: './images/viper.png',
+    video: './videos/viper.webm',
   },
   // Agrega más héroes según sea necesario
 ];
