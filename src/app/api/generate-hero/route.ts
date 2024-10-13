@@ -7,6 +7,14 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
+
+   
+   const headers = {
+        'Access-Control-Allow-Origin': '*', // O especifica tu dominio si es necesario
+        'Access-Control-Allow-Methods': 'POST',
+        'Content-Type': 'application/json',
+      }; 
+    
   const { userHeroSelection, position } = await req.json();
 
   // Solicitar la respuesta en español con información breve
@@ -26,9 +34,9 @@ export async function POST(req: Request) {
     const picksArray = counterPicks.split('\n').map(pick => pick.trim()).filter(pick => pick);
     const finalPicks = picksArray.length >= 3 ? picksArray.slice(0, 3) : picksArray;
 
-    return NextResponse.json({ counterPicks: finalPicks.join('\n') });
+    return new NextResponse(JSON.stringify({ counterPicks: finalPicks.join('\n') }), { headers });
   } catch (error) {
     console.error('Error en OpenAI:', error);
-    return NextResponse.json({ error: 'Error en la generación de héroes.' }, { status: 500 });
+    return new NextResponse(JSON.stringify({ error: 'Error en la generación de héroes.' }), { status: 500, headers });
   }
 }
