@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server'; // Importa NextRequest
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 
-export async function POST(request) {
+export async function POST(request: NextRequest) { // Añade el tipo NextRequest
   const { allies, enemies, rank } = await request.json();
 
   // Definición de roles
