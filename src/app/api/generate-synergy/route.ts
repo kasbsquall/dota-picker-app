@@ -16,7 +16,7 @@ export async function POST(request) {
   const missingRoles = roles.filter(role => !filledRoles.includes(role));
 
   // Generar el prompt basado en los héroes seleccionados y los roles faltantes
-  let prompt = `Eres un analista profesional de sinergia de héroes de Dota 2. Aquí tienes una lista de héroes: 
+  const prompt = `Eres un analista profesional de sinergia de héroes de Dota 2. Aquí tienes una lista de héroes: 
   Aliados: ${allies.map(a => a?.name).join(', ')}, 
   Enemigos: ${enemies.map(e => e?.name).join(', ')}, 
   Nivel de rango: ${rank}. 
