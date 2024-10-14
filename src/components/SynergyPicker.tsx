@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import './SynergyPicker.css'; // Importa el CSS específico para este componente
+
 // Lista de héroes con su nombre y video
 const heroes = [
     {
@@ -113,7 +114,7 @@ const heroes = [
       image: './images/mini/wisp.png',
     },
     // Agrega más héroes según sea necesario
-  ];
+];
 
 const roles = [
   'Hard Support', 'Support', 'Midlaner', 'Carry', 'Offlaner'
@@ -130,7 +131,7 @@ const SynergyPicker = () => {
   const [suggestions, setSuggestions] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleDrop = (event, type, index) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>, type: string, index: number) => {
     event.preventDefault();
     const heroName = event.dataTransfer.getData('heroName');
     const heroImage = event.dataTransfer.getData('heroImage');
@@ -147,12 +148,12 @@ const SynergyPicker = () => {
     }
   };
 
-  const handleDragStart = (event, hero) => {
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, hero: { name: string; image: string }) => {
     event.dataTransfer.setData('heroName', hero.name);
     event.dataTransfer.setData('heroImage', hero.image);
   };
 
-  const handleRemoveHero = (type, index) => {
+  const handleRemoveHero = (type: string, index: number) => {
     if (type === 'ally') {
       const newAllies = [...allyHeroes];
       newAllies[index] = null;
@@ -280,10 +281,10 @@ const SynergyPicker = () => {
       {/* Indicador de carga */}
       {loading && <div className="loader"></div>}
 
-      {/* Resultados */}
+      {/* Sugerencias */}
       {suggestions && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">Recomendaciones:</h2>
+        <div className="mt-4 p-4 border rounded">
+          <h3 className="font-semibold">Sugerencias:</h3>
           <p>{suggestions}</p>
         </div>
       )}
