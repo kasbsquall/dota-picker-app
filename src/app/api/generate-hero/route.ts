@@ -37,6 +37,6 @@ export async function POST(req: Request) {
     return new NextResponse(JSON.stringify({ counterPicks: finalPicks.join('\n') }), { headers });
   } catch (error) {
     console.error('Error en OpenAI:', error);
-    return new NextResponse(JSON.stringify({ error: 'Error en la generación de héroes.' }), { status: 500, headers });
+    return new NextResponse(JSON.stringify({ error: 'Error en la generación de héroes. ' }), { status: 500, headers });
   }
 }
