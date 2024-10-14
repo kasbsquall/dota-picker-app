@@ -1,0 +1,41 @@
+.synergy-picker {
+    border-radius: 8px; /* Bordes redondeados */
+    padding: 16px; /* Espaciado interior */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
+.slot-grid {
+    display: flex; /* Usar flexbox para alinear horizontalmente */
+    justify-content: space-between; /* Espaciado igual entre los slots */
+    margin-bottom: 1rem; /* Margen inferior entre las secciones */
+}
+
+.hero-slot {
+    flex: 1; /* Cada héroe ocupará el mismo espacio */
+    box-sizing: border-box; /* Asegúrate de que el padding y el margen se calculen correctamente */
+    border: 2pt solid #353535;
+    border-bottom: 5pt solid #353535;
+    background: linear-gradient(0deg, rgb(47 47 47) 0%, rgb(21 21 24) 100%);
+    text-align: center;
+    padding: 20px;
+}
+
+.hero-slot:last-child {
+    margin-right: 0; /* Elimina el margen derecho en el último héroe */
+}
+
+.empty-slot {
+    color: #888; /* Color de texto para slots vacíos */
+    font-style: italic; /* Cursiva para el texto */
+}
+
+
+.grillaespecial{
+    grid-template-columns: repeat(5, 1fr);
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    margin-bottom: 20px;
+}

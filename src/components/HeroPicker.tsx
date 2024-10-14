@@ -6,34 +6,112 @@ import { useState } from 'react';
 // Lista de héroes con su nombre y video
 const heroes = [
   {
-    name: 'Templar Assassin',
-    image: './images/templar_assassin.png',
-    video: './videos/templar_assassin.webm',
+    name: 'Alchemist',
+    image: './images/mini/alchemist.png',
+  },
+  {
+    name: 'Antimage',
+    image: './images/mini/antimage.png',
   },
   {
     name: 'Axe',
-    image: './images/axe.png',
-    video: './videos/axe.webm',
+    image: './images/mini/axe.png',
   },
   {
     name: 'Bane',
-    image: './images/bane.png',
-    video: './videos/bane.webm',
+    image: './images/mini/bane.png',
   },
   {
-    name: 'Outworld Devourer',
-    image: './images/outworld_destroyer.png',
-    video: './videos/outworld_destroyer.webm',
+    name: 'Clinkz',
+    image: './images/mini/clinkz.png',
+  },
+  {
+    name: 'Enigma',
+    image: './images/mini/enigma.png',
+  },
+  {
+    name: 'Furion',
+    image: './images/mini/furion.png',
+  },
+  {
+    name: 'Huskar',
+    image: './images/mini/huskar.png',
+  },
+  {
+    name: 'Invoker',
+    image: './images/mini/invoker.png',
+  },
+  {
+    name: 'Kunkka',
+    image: './images/mini/kunkka.png',
+  },
+  {
+    name: 'Lina',
+    image: './images/mini/lina.png',
+  },
+  {
+    name: 'Luna',
+    image: './images/mini/luna.png',
+  },
+  {
+    name: 'Meepo',
+    image: './images/mini/meepo.png',
+  },
+  {
+    name: 'Puck',
+    image: './images/mini/puck.png',
+  },
+  {
+    name: 'Pudge',
+    image: './images/mini/pudge.png',
   },
   {
     name: 'Pugna',
-    image: './images/pugna.png',
-    video: './videos/pugna.webm',
+    image: './images/mini/pugna.png',
+  },
+  {
+    name: 'Rubick',
+    image: './images/mini/rubick.png',
+  },
+  {
+    name: 'Sniper',
+    image: './images/mini/sniper.png',
+  },
+  {
+    name: 'Techies',
+    image: './images/mini/techies.png',
+  },
+  {
+    name: 'Templar Assassin',
+    image: './images/mini/templar_assassin.png',
+  },
+  {
+    name: 'Tidehunter',
+    image: './images/mini/tidehunter.png',
+  },
+  {
+    name: 'Tiny',
+    image: './images/mini/tiny.png',
+  },
+  {
+    name: 'Ursa',
+    image: './images/mini/ursa.png',
+  },
+  {
+    name: 'Venomancer',
+    image: './images/mini/venomancer.png',
   },
   {
     name: 'Viper',
-    image: './images/viper.png',
-    video: './videos/viper.webm',
+    image: './images/mini/viper.png',
+  },
+  {
+    name: 'Windrunner',
+    image: './images/mini/windrunner.png',
+  },
+  {
+    name: 'Wisp',
+    image: './images/mini/wisp.png',
   },
   // Agrega más héroes según sea necesario
 ];
