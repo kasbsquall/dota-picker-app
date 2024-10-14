@@ -15,13 +15,14 @@ export async function POST(request: NextRequest) {
   const { allies, enemies, rank } = await request.json();
 
   // Definición de roles
-  const roles = ['Hard Support', 'Support', 'Midlaner', 'Carry', 'Offlaner'];
+  const roles: string[] = ['Hard Support', 'Support', 'Midlaner', 'Carry', 'Offlaner'];
 
   // Identificar roles faltantes en aliados
-  const filledRoles = allies.map((hero: Hero, index: number) => 
+  const filledRoles: (string | null)[] = allies.map((hero: Hero, index: number) => 
     hero ? roles[index] : null
-  ).filter(role => role !== null);
+  );
 
+  // Aquí se agrega el tipo 'string' al parámetro role
   const missingRoles = roles.filter((role: string) => !filledRoles.includes(role));
 
   // Generar el prompt basado en los héroes seleccionados y los roles faltantes
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   Enemigos: ${enemies.map((e: Hero) => e?.name).join(', ')}, 
   Nivel de rango: ${rank}. 
   Los roles que faltan en aliados son: ${missingRoles.join(', ')}. 
-  Da una respuesta directa y profesional del heroe más adecuado por cada rol faltante en base a sinergia y contra pickear a los enemigos. Además genera un % de probabilidad de victoria en base a los picks.`;
+  Da una respuesta directa y profesional del héroe más adecuado por cada rol faltante en base a sinergia y contra pickear a los enemigos. Además genera un % de probabilidad de victoria en base a los picks.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',

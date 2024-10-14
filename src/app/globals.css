@@ -144,36 +144,14 @@ button:hover {
   object-fit: cover;
 }
 
-/* Media Queries para hacer el diseño responsivo */
-@media (max-width: 1200px) {
-  .hero-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 columnas en pantallas medianas */
-  }
-}
-
-@media (max-width: 900px) {
-  .hero-grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas en pantallas más pequeñas */
-  }
-}
-
 @media (max-width: 600px) {
   .hero-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas en pantallas pequeñas */
-  }
-
-  .hero-name {
-    font-size: 16px;
-  }
-}
-
-@media (max-width: 400px) {
-  .hero-grid {
-    grid-template-columns: repeat(1, 1fr); /* 1 columna en pantallas muy pequeñas */
+    grid-template-columns: repeat(3, 1fr); /* 2 columnas en pantallas pequeñas */
   }
 
   .hero-name {
     font-size: 14px;
   }
 }
+
 
