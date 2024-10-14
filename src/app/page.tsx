@@ -13,7 +13,7 @@ export default function Home() {
       <p className="text-lg mb-6 text-center">Selecciona una herramienta para mejorar tu estrategia.</p>
       
       {!tool && (
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 flexbloque">
           <button 
             className="bg-blue-500 text-white rounded p-4 hover:bg-blue-600 transition" 
             onClick={() => setTool('counter')}

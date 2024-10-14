@@ -29,9 +29,11 @@ export async function POST(request: NextRequest) {
   const prompt = `Eres un analista profesional de sinergia de héroes de Dota 2. Aquí tienes una lista de héroes: 
   Aliados: ${allies.map((a: Hero) => a?.name).join(', ')}, 
   Enemigos: ${enemies.map((e: Hero) => e?.name).join(', ')}, 
-  Nivel de rango: ${rank}. 
+  Nivel de medalla de la partida: ${rank}. 
   Los roles que faltan en aliados son: ${missingRoles.join(', ')}. 
-  Da una respuesta directa y profesional del héroe más adecuado por cada rol faltante en base a sinergia y contra pickear a los enemigos. Además genera un % de probabilidad de victoria en base a los picks.`;
+  No recomiendes héroes que ya están presentes en Aliados o Enemigos. 
+  Si el usuario no coloco ningún heroe Enemigos entonces solo da una respuesta en base a la mejor sinergia y combo de equipo.
+  Da una respuesta directa y profesional del héroe más adecuado por cada rol faltante en base a sinergia y contra pickear a los enemigos.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',

@@ -130,6 +130,8 @@ const SynergyPicker = () => {
   const [selectedRank, setSelectedRank] = useState(ranks[0]);
   const [suggestions, setSuggestions] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState({ type: '', index: -1 });
+
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, type: string, index: number) => {
     event.preventDefault();
@@ -165,6 +167,31 @@ const SynergyPicker = () => {
     }
   };
 
+  const handleSlotClick = (type: string, index: number) => {
+    if (selectedSlot.index === index && selectedSlot.type === type) {
+      setSelectedSlot({ type: '', index: -1 }); // Deseleccionar
+    } else {
+      setSelectedSlot({ type, index });
+    }
+  };
+
+  const handleHeroClick = (hero: { name: string; image: string }) => {
+    if (selectedSlot.index !== -1) {
+      const { type, index } = selectedSlot;
+      if (type === 'ally') {
+        const newAllies = [...allyHeroes];
+        newAllies[index] = hero;
+        setAllyHeroes(newAllies);
+      } else if (type === 'enemy') {
+        const newEnemies = [...enemyHeroes];
+        newEnemies[index] = hero;
+        setEnemyHeroes(newEnemies);
+      }
+      setSelectedSlot({ type: '', index: -1 }); // Limpiar la selección
+    }
+  };
+
+
   const handleSubmit = async () => {
     setLoading(true);
     
@@ -197,13 +224,16 @@ const SynergyPicker = () => {
       
       {/* Espacios para aliados */}
       <div className="flex justify-start mb-4">
+      <h2 className="block mb-4 font-semibold center">Heroes Aliados</h2>
         <div className="grid grid-cols-5 gap-4 grillaespecial">
           {allyHeroes.map((hero, index) => (
             <div
               key={index}
-              className="hero-slot"
+              //className="hero-slot"
+              className={`hero-slot ${selectedSlot.type === 'ally' && selectedSlot.index === index ? 'selected' : ''}`}
               onDrop={(event) => handleDrop(event, 'ally', index)}
               onDragOver={(event) => event.preventDefault()}
+              onClick={() => handleSlotClick('ally', index)}
             >
               <p>{roles[index]}</p>
               {hero ? (
@@ -221,13 +251,16 @@ const SynergyPicker = () => {
 
       {/* Espacios para enemigos */}
       <div className="flex justify-start mb-4">
+      <h2 className="block mb-4 font-semibold center">Heroes Enemigos</h2>
         <div className="grid grid-cols-5 gap-4 grillaespecial">
           {enemyHeroes.map((hero, index) => (
             <div
               key={index}
-              className="hero-slot"
+              //className="hero-slot"
+              className={`hero-slot ${selectedSlot.type === 'enemy' && selectedSlot.index === index ? 'selected' : ''}`}
               onDrop={(event) => handleDrop(event, 'enemy', index)}
               onDragOver={(event) => event.preventDefault()}
+              onClick={() => handleSlotClick('enemy', index)}
             >
               <p>{roles[index]}</p>
               {hero ? (
@@ -251,6 +284,7 @@ const SynergyPicker = () => {
             className="hero-card" 
             draggable 
             onDragStart={(event) => handleDragStart(event, hero)}
+            onClick={() => handleHeroClick(hero)} // Permitir clic para añadir si hay un slot seleccionado
           >
             <img src={hero.image} alt={hero.name} className="hero-image" />
             <p>{hero.name}</p>
