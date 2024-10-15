@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const { userHeroSelection, position } = await req.json();
 
   // Solicitar la respuesta en español con información breve
-  const prompt = `Eres un Profesional de Dota 2. Dame los 3 mejores héroes para counterpickear en la meta actual a ${userHeroSelection} en la posición de ${position} en Dota 2. Proporciona cada opción en una línea separada y usa descripciones breves para que no se corten las respuestas.`;
+  const prompt = `Eres un Profesional de Dota 2. Dame los 3 mejores héroes para counterpickear en la meta actual a ${userHeroSelection} que sean solo unicamente heroes de la posición de ${position} en Dota 2. Proporciona cada opción en una línea separada y usa descripciones breves para que no se corten las respuestas.`;
 
   try {
     const response = await openai.chat.completions.create({

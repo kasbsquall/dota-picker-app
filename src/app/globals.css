@@ -116,14 +116,12 @@ button:hover {
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   text-align: center;
+  height: fit-content;
   padding: 6px;
   cursor: pointer;
   transition: transform 0.2s, border 0.2s;
-  display: flex;
   flex-direction: column; /* Contenido de la tarjeta alineado en columna */
   justify-content: space-between; /* Distribuye el espacio entre los elementos */
-  min-height: 40px;
-  height: 125px;
 }
 
 .hero-card:hover {
@@ -162,6 +160,6 @@ button:hover {
 }
 
 .hero-card p{
-  margin-block-start: 12px;
-  margin-block-end: 12px;
+  margin-block-start: 4px;
+  margin-block-end: 4px;
 }
