@@ -45,6 +45,26 @@ select:hover {
   border-color: #888;
 }
 
+.hero-name-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.hero-card:hover .hero-name-overlay {
+  opacity: 1;
+}
+
 button {
   padding: 10px 20px;
   background-color: #007d00;

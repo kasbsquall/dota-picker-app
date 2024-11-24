@@ -2,10 +2,11 @@
 
 import HeroPicker from '@/components/HeroPicker';
 import SynergyPicker from '@/components/SynergyPicker';
+import ItemizationCalculator from '@/components/ItemizationCalculator';
 import { useState } from 'react';
 
 export default function Home() {
-  const [tool, setTool] = useState<'counter' | 'synergy' | null>(null);
+  const [tool, setTool] = useState<'counter' | 'synergy' | 'itemization' | null>(null);
 
   return (
     <div className="hero-picker-container flex flex-col items-center justify-center min-h-screen">
@@ -26,11 +27,18 @@ export default function Home() {
           >
             Synergy Picker
           </button>
+          <button 
+            className="bg-purple-500 text-white rounded p-4 hover:bg-purple-600 transition" 
+            onClick={() => setTool('itemization')}
+          >
+            Calculadora de Items
+          </button>
         </div>
       )}
 
       {tool === 'counter' && <HeroPicker />}
       {tool === 'synergy' && <SynergyPicker />}
+      {tool === 'itemization' && <ItemizationCalculator />}
     </div>
   );
 }
