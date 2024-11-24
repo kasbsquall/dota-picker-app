@@ -106,18 +106,16 @@ button:hover {
 /* Grid de héroes */
 .hero-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(9, minmax(100px, 1fr));
+  gap: 6px;
+  grid-template-columns: repeat(12, minmax(90px, 1fr));
   margin-bottom: 20px;
 }
 
 .hero-card {
   background-color: rgba(27, 27, 27, 0.8);
-  border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   text-align: center;
   height: fit-content;
-  padding: 6px;
   cursor: pointer;
   transition: transform 0.2s, border 0.2s;
   flex-direction: column; /* Contenido de la tarjeta alineado en columna */
@@ -161,5 +159,7 @@ button:hover {
 
 .hero-card p{
   margin-block-start: 4px;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
   margin-block-end: 4px;
 }

@@ -1,94 +1,148 @@
 /* CSS actualizado para SynergyPicker */
 
 .slot-grid {
-    display: flex; /* Usar flexbox para alinear horizontalmente */
-    justify-content: space-between; /* Espaciado igual entre los slots */
-    margin-bottom: 1rem; /* Margen inferior entre las secciones */
+  display: flex; /* Usar flexbox para alinear horizontalmente */
+  justify-content: space-between; /* Espaciado igual entre los slots */
+  margin-bottom: 1rem; /* Margen inferior entre las secciones */
 }
 
 .hero-slot {
-    flex: 1; /* Cada héroe ocupará el mismo espacio */
-    box-sizing: border-box; /* Asegúrate de que el padding y el margen se calculen correctamente */
-    border: 2pt solid #353535;
-    border-bottom: 5pt solid #353535;
-    background: linear-gradient(0deg, rgb(47 47 47) 0%, rgb(21 21 24) 100%);
-    text-align: center;
-    padding: 20px;
-    position: relative; /* Para el botón de eliminar héroe */
-    cursor: pointer; /* Cambiar cursor al pasar por encima */
+  flex: 1; /* Cada héroe ocupará el mismo espacio */
+  box-sizing: border-box; /* Asegúrate de que el padding y el margen se calculen correctamente */
+  border: 2pt solid #353535;
+  border-bottom: 5pt solid #353535;
+  background: linear-gradient(0deg, rgb(47 47 47) 0%, rgb(21 21 24) 100%);
+  text-align: center;
+  padding: 20px;
+  position: relative; /* Para el botón de eliminar héroe */
+  cursor: pointer; /* Cambiar cursor al pasar por encima */
 }
 
 .hero-slot:last-child {
-    margin-right: 0; /* Elimina el margen derecho en el último héroe */
+  margin-right: 0; /* Elimina el margen derecho en el último héroe */
 }
 
 .empty-slot {
-    color: #888; /* Color de texto para slots vacíos */
-    font-style: italic; /* Cursiva para el texto */
+  color: #888; /* Color de texto para slots vacíos */
+  font-style: italic; /* Cursiva para el texto */
 }
 
 .grillaespecial {
-    grid-template-columns: repeat(5, 1fr);
-    display: grid;
-    align-content: center;
-    justify-content: center;
-    align-items: center;
-    justify-items: center;
-    margin-bottom: 20px;
+  grid-template-columns: repeat(5, 1fr);
+  display: grid;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  margin-bottom: 20px;
 }
 
+.hero-image-container {
+  position: relative;
+  width: 100%;
+  height: 60px;
+}
+
+.hero-name-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.hero-card:hover .hero-name-overlay {
+  opacity: 1;
+}
 
 .hero-item {
-    text-align: center; /* Centrar el texto del héroe */
-    cursor: grab; /* Cambiar cursor al pasar por encima */
+  text-align: center; /* Centrar el texto del héroe */
+  cursor: grab; /* Cambiar cursor al pasar por encima */
 }
 
 .hero-item:hover {
-    background: #f0f0f0; /* Fondo gris al pasar el cursor sobre un héroe */
+  background: #f0f0f0; /* Fondo gris al pasar el cursor sobre un héroe */
 }
 
 .btn-submit {
-    background: #007bff; /* Color de fondo del botón */
-    color: white; /* Color del texto */
-    border: none; /* Sin borde */
-    padding: 0.5rem 1rem; /* Espaciado interno */
-    border-radius: 4px; /* Bordes redondeados */
-    cursor: pointer; /* Cambiar cursor al pasar por encima */
+  background: #007bff; /* Color de fondo del botón */
+  color: white; /* Color del texto */
+  border: none; /* Sin borde */
+  padding: 0.5rem 1rem; /* Espaciado interno */
+  border-radius: 4px; /* Bordes redondeados */
+  cursor: pointer; /* Cambiar cursor al pasar por encima */
 }
 
 .suggestions {
-    background: #f9f9f9; /* Fondo de las sugerencias */
-    padding: 1rem; /* Espaciado interno */
-    border-radius: 4px; /* Bordes redondeados */
+  background: #f9f9f9; /* Fondo de las sugerencias */
+  padding: 1rem; /* Espaciado interno */
+  border-radius: 4px; /* Bordes redondeados */
 }
 
 @media (max-width: 768px) {
-    .hero-slot {
-        flex: 1 1; /* En pantallas más pequeñas, dos héroes por fila */
-        padding: 10px;
-    }
+  .hero-slot {
+    flex: 1 1; /* En pantallas más pequeñas, dos héroes por fila */
+    padding: 10px;
+  }
 
-    .grillaespecial {
-        grid-template-columns: repeat(2, 1fr);
-        width: 100%;
-    }
+  .grillaespecial {
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+  }
 
-    .hero-picker-container{
+  .hero-picker-container {
+    padding: 20px;
+    width: -webkit-fill-available;
+  }
 
-        padding: 20px;
-        width: -webkit-fill-available;
-    }
+  .hero-card {
+    padding: 0px;
+  }
 
-    .hero-card{
-        padding: 0px;
-    }
-
-    .hero-grid{
-        gap: 0px;
-    }
+  .hero-grid {
+    gap: 0px;
+  }
 }
 
-.center{
-    text-align: center;
-    color: #00ff00;
+.center {
+  text-align: center;
+  color: #00ff00;
+}
+
+.hero-card.selected {
+  filter: grayscale(100%) opacity(0.5);
+  pointer-events: none;
+}
+
+.recommendation {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.role {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.hero-name {
+  font-weight: bold;
+}
+
+.reason-list {
+  color: white;
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.heroinforecomendation {
+  margin-left: 20px;
 }
