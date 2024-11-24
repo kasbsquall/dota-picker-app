@@ -11,6 +11,19 @@ interface RecommendationItemProps {
   reasons: string[];
 }
 
+interface Hero {
+  name: string;
+  image: string;
+}
+
+interface SynergyResponse {
+  suggestions: string;
+}
+
+interface ApiError {
+  message: string;
+}
+
 // Lista de héroes con su nombre y video
 const heroes = [
   {
@@ -516,12 +529,12 @@ const ranks = [
 ];
 
 const SynergyPicker = () => {
-  const [allyHeroes, setAllyHeroes] = useState(Array(5).fill(null));
-  const [enemyHeroes, setEnemyHeroes] = useState(Array(5).fill(null));
-  const [selectedRank, setSelectedRank] = useState(ranks[0]);
-  const [suggestions, setSuggestions] = useState<RecommendationItemProps[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState({ type: '', index: -1 });
+  const [allyHeroes, setAllyHeroes] = useState<(Hero | null)[]>(Array(5).fill(null));
+const [enemyHeroes, setEnemyHeroes] = useState<(Hero | null)[]>(Array(5).fill(null));
+const [selectedRank, setSelectedRank] = useState<string>(ranks[0]);
+const [suggestions, setSuggestions] = useState<RecommendationItemProps[]>([]);
+const [loading, setLoading] = useState<boolean>(false);
+const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }>({ type: '', index: -1 });
 
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, type: string, index: number) => {
@@ -591,11 +604,6 @@ const SynergyPicker = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      console.log('Enviando request con datos:', {
-        allies: allyHeroes,
-        enemies: enemyHeroes,
-        rank: selectedRank
-      });
       
       const response = await fetch('/api/generate-synergy', {
         method: 'POST',
@@ -609,42 +617,21 @@ const SynergyPicker = () => {
         }),
       });
   
-      // Log de la respuesta cruda
       const responseText = await response.text();
-      console.log('Respuesta cruda de la API:', responseText);
+      const data = JSON.parse(responseText) as SynergyResponse;
   
-      // Intentar parsear la respuesta como JSON
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Error parseando respuesta JSON:', e);
-        throw new Error('Respuesta inválida del servidor');
+      if (!response.ok || !data.suggestions) {
+        throw new Error('Error en la solicitud');
       }
   
-      if (!response.ok) {
-        console.error('Error en la respuesta:', data);
-        throw new Error(data.error || 'Error en la solicitud');
-      }
-  
-      if (!data.suggestions) {
-        console.error('No hay sugerencias en la respuesta:', data);
-        throw new Error('No se recibieron sugerencias');
-      }
-  
-      console.log('Sugerencias recibidas:', data.suggestions);
-      
       const recommendationsData = parseRecommendations(data.suggestions);
-      console.log('Recomendaciones parseadas:', recommendationsData);
       
       if (recommendationsData.length === 0) {
-        console.warn('No se pudieron parsear recomendaciones de la respuesta');
         throw new Error('No se pudieron procesar las sugerencias');
       }
   
       setSuggestions(recommendationsData);
   
-      // Scroll hacia las sugerencias
       setTimeout(() => {
         const suggestionsElement = document.querySelector('.suggestions-container');
         if (suggestionsElement) {
@@ -655,18 +642,13 @@ const SynergyPicker = () => {
         }
       }, 100);
   
-    } catch (error: any) { // Aquí especificamos el tipo como 'any' o podemos usar un tipo más específico
-      console.error('Error completo:', error);
-      // Mostrar el error al usuario de forma segura
+    } catch (error: unknown) { // Tipado específico para el error
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       setSuggestions([{
         role: 'Error',
         heroName: 'Error en la solicitud',
         heroImage: '',
-        reasons: [
-          typeof error.message === 'string' 
-            ? error.message 
-            : 'Hubo un error procesando tu solicitud. Por favor intenta de nuevo.'
-        ]
+        reasons: ['Hubo un error procesando tu solicitud. Por favor intenta de nuevo.']
       }]);
     } finally {
       setLoading(false);
