@@ -589,49 +589,111 @@ const SynergyPicker = () => {
 
 
   const handleSubmit = async () => {
-    setLoading(true);
-    
-    const response = await fetch('/api/generate-synergy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    try {
+      setLoading(true);
+      console.log('Enviando request con datos:', {
         allies: allyHeroes,
         enemies: enemyHeroes,
         rank: selectedRank
-      }),
-    });
-
-    setLoading(false);
-
-    if (!response.ok) {
-      // Handle error
-      return;
+      });
+      
+      const response = await fetch('/api/generate-synergy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          allies: allyHeroes,
+          enemies: enemyHeroes,
+          rank: selectedRank
+        }),
+      });
+  
+      // Log de la respuesta cruda
+      const responseText = await response.text();
+      console.log('Respuesta cruda de la API:', responseText);
+  
+      // Intentar parsear la respuesta como JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Error parseando respuesta JSON:', e);
+        throw new Error('Respuesta inválida del servidor');
+      }
+  
+      if (!response.ok) {
+        console.error('Error en la respuesta:', data);
+        throw new Error(data.error || 'Error en la solicitud');
+      }
+  
+      if (!data.suggestions) {
+        console.error('No hay sugerencias en la respuesta:', data);
+        throw new Error('No se recibieron sugerencias');
+      }
+  
+      console.log('Sugerencias recibidas:', data.suggestions);
+      
+      const recommendationsData = parseRecommendations(data.suggestions);
+      console.log('Recomendaciones parseadas:', recommendationsData);
+      
+      if (recommendationsData.length === 0) {
+        console.warn('No se pudieron parsear recomendaciones de la respuesta');
+        throw new Error('No se pudieron procesar las sugerencias');
+      }
+  
+      setSuggestions(recommendationsData);
+  
+      // Scroll hacia las sugerencias
+      setTimeout(() => {
+        const suggestionsElement = document.querySelector('.suggestions-container');
+        if (suggestionsElement) {
+          suggestionsElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start'
+          });
+        }
+      }, 100);
+  
+    } catch (error: any) { // Aquí especificamos el tipo como 'any' o podemos usar un tipo más específico
+      console.error('Error completo:', error);
+      // Mostrar el error al usuario de forma segura
+      setSuggestions([{
+        role: 'Error',
+        heroName: 'Error en la solicitud',
+        heroImage: '',
+        reasons: [
+          typeof error.message === 'string' 
+            ? error.message 
+            : 'Hubo un error procesando tu solicitud. Por favor intenta de nuevo.'
+        ]
+      }]);
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
-    const recommendationsData = parseRecommendations(data.suggestions);
-    setSuggestions(recommendationsData);
   };
 
   const parseRecommendations = (suggestionsText: string) => {
     const recommendations: RecommendationItemProps[] = [];
     
-    // Dividir el texto en bloques de recomendaciones
-    const roleBlocks = suggestionsText.split(/(?=(?:Hard Support|Support|Midlaner|Carry|Offlaner):)/);
+    // Dividir el texto en bloques por roles
+    const blocks = suggestionsText.split('\n\n').filter(block => block.trim());
     
-    roleBlocks.forEach(block => {
-      // Mejorar la expresión regular para capturar el rol completo
-      const headerMatch = block.match(/^((?:Hard Support|Support|Midlaner|Carry|Offlaner)):\s*(\w+(?:\s+\w+)*)/);
+    blocks.forEach(block => {
+      const lines = block.split('\n');
+      const firstLine = lines[0].trim();
+      
+      // Buscar el formato "Rol: Héroe" en la primera línea
+      const headerMatch = firstLine.match(/^(Hard Support|Support|Midlaner|Carry|Offlaner):\s*(\w+(?:\s+\w+)*)/);
+      
       if (headerMatch) {
         const [, role, heroName] = headerMatch;
         
-        // Extraer las razones (cada línea que comienza con -)
-        const reasons = block
-          .split('\n')
+        // Extraer las razones (líneas que empiezan con -)
+        const reasons = lines
+          .slice(1) // Ignorar la primera línea que contiene el rol y héroe
           .filter(line => line.trim().startsWith('-'))
-          .map(line => line.replace('-', '').trim());
+          .map(line => line.replace(/^-\s*/, '').trim());
         
         if (reasons.length > 0) {
           recommendations.push({
@@ -655,9 +717,9 @@ const SynergyPicker = () => {
   return (
     <div className="p-4 synergy-picker">
       <h2 className="block mb-4 font-semibold">Synergy Picker</h2>
-      
+      <div className="versus">
       {/* Espacios para aliados */}
-      <div className="flex justify-start mb-4">
+      <div className="flex justify-start mb-4 bloqueigual">
       <h2 className="block mb-4 font-semibold center">Heroes Aliados</h2>
         <div className="grid grid-cols-5 gap-4 grillaespecial">
           {allyHeroes.map((hero, index) => (
@@ -684,7 +746,7 @@ const SynergyPicker = () => {
       </div>
 
       {/* Espacios para enemigos */}
-      <div className="flex justify-start mb-4">
+      <div className="flex justify-start mb-4 bloqueigual">
       <h2 className="block mb-4 font-semibold center">Heroes Enemigos</h2>
         <div className="grid grid-cols-5 gap-4 grillaespecial">
           {enemyHeroes.map((hero, index) => (
@@ -709,7 +771,8 @@ const SynergyPicker = () => {
           ))}
         </div>
       </div>
-
+      </div>
+      
       {/* Selector de héroes */}
       <div className="hero-grid">
   {heroes.map((hero, index) => (
@@ -753,7 +816,7 @@ const SynergyPicker = () => {
 
       {/* Sugerencias */}
       {suggestions.length > 0 && (
-  <div className="mt-4 p-4 border rounded">
+  <div className="mt-4 p-4 border rounded suggestions-container">
     <h3 className="font-semibold">Sugerencias:</h3>
     {suggestions.map((suggestion, index) => (
       <RecommendationItem

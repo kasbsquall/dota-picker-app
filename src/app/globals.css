@@ -144,11 +144,21 @@ button:hover {
 
 @media (max-width: 600px) {
   .hero-grid {
-    grid-template-columns: repeat(3, 1fr); /* 2 columnas en pantallas pequeñas */
+    grid-template-columns: repeat(5, 1fr); /* 2 columnas en pantallas pequeñas */
   }
 
   .hero-name {
     font-size: 14px;
+  }
+
+  .hero-image-container {
+    height: 40px !important;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: 40px;
+    object-fit: cover;
   }
 }
 
@@ -162,4 +172,13 @@ button:hover {
   text-overflow: ellipsis;
   overflow-wrap: break-word;
   margin-block-end: 4px;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+.suggestions-container {
+  scroll-margin-top: 20px; /* Añade un pequeño margen al scroll para mejor visibilidad */
 }

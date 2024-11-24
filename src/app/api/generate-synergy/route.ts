@@ -72,12 +72,16 @@ Nivel de medalla de la partida: ${rank}
 
 Los roles faltantes en el equipo aliado son: ${missingRoles.join(", ")}.
 
+IMPORTANTE: Sigue EXACTAMENTE este formato para cada recomendación:
+
 Para cada rol faltante, proporciona una recomendación usando EXACTAMENTE este formato:
 
 [ROL]: [HÉROE]
 - [RAZÓN 1]
 - [RAZÓN 2]
 - [RAZÓN 3]
+
+NO pongas el nombre del héroe en una nueva línea, debe estar en la misma línea que el rol.
 
 Proporciona una recomendación para CADA rol faltante, considerando:
 - Sinergia y combos efectivos con los héroes aliados existentes
@@ -88,7 +92,7 @@ Evita recomendar héroes que ya estén presentes en ambos equipos.
 
 Si no se proporcionaron héroes enemigos, enfoca tu respuesta únicamente en la mejor sinergia y combos con los héroes aliados.
 
-Limita tu respuesta a un máximo de 50 palabras por recomendación para cada rol. La claridad y la precisión son esenciales.`;
+Limita tu respuesta a un máximo de 50 palabras por recomendación para cada rol obligatoriamente. La claridad y la precisión son esenciales.`;
 
 
   const response = await openai.chat.completions.create({

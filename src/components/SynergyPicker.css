@@ -7,34 +7,62 @@
 }
 
 .hero-slot {
-  flex: 1; /* Cada héroe ocupará el mismo espacio */
-  box-sizing: border-box; /* Asegúrate de que el padding y el margen se calculen correctamente */
+  flex: 1;
+  box-sizing: border-box;
   border: 2pt solid #353535;
   border-bottom: 5pt solid #353535;
   background: linear-gradient(0deg, rgb(47 47 47) 0%, rgb(21 21 24) 100%);
   text-align: center;
-  padding: 20px;
-  position: relative; /* Para el botón de eliminar héroe */
-  cursor: pointer; /* Cambiar cursor al pasar por encima */
+  padding: 5px;
+  position: relative;
+  min-height: 120px; /* Altura fija para todos los slots */
+  cursor: pointer;
+  font-size: 12px;
 }
 
 .hero-slot:last-child {
   margin-right: 0; /* Elimina el margen derecho en el último héroe */
 }
 
+.hero-slot p:first-child {
+  margin: 0;
+  padding: 5px 0;
+  height: 24px; /* Altura fija para el título */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .empty-slot {
-  color: #888; /* Color de texto para slots vacíos */
-  font-style: italic; /* Cursiva para el texto */
+  color: #888;
+  font-style: italic;
+  font-size: 10px;
+  height: 60px; /* Misma altura que las imágenes */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.versus {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.bloqueigual {
+  width: 50%;
+  display: inline-block;
+  vertical-align: top; /* Alinea los bloques desde arriba */
 }
 
 .grillaespecial {
   grid-template-columns: repeat(5, 1fr);
   display: grid;
   align-content: center;
-  justify-content: center;
   align-items: center;
-  justify-items: center;
   margin-bottom: 20px;
+  justify-content: center;
+  gap: 10px;
+  align-items: stretch; /* Estira los items para tener la misma altura */
 }
 
 .hero-image-container {
@@ -93,6 +121,20 @@
     padding: 10px;
   }
 
+  .grillaespecial{
+    margin-bottom: 0px;
+  }
+
+  .bloqueigual {
+    width: 100%;
+  }
+
+  .versus {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
   .grillaespecial {
     grid-template-columns: repeat(2, 1fr);
     width: 100%;
@@ -109,6 +151,12 @@
 
   .hero-grid {
     gap: 0px;
+  }
+
+  .recommendation {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 }
 
