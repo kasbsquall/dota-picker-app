@@ -639,7 +639,7 @@ const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }
         }
       }, 100);
   
-    } catch (error: unknown) {
+    } catch (_: unknown) {
       setSuggestions([{
         role: 'Error',
         heroName: 'Error en la solicitud',
