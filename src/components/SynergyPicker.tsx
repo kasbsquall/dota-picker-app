@@ -630,22 +630,15 @@ const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }
       setSuggestions(recommendationsData);
   
       setTimeout(() => {
-        const suggestionsElement = document.querySelector('.suggestions-container');
-        if (suggestionsElement) {
-          suggestionsElement.scrollIntoView({ 
+        const counterPicksElement = document.querySelector('.counter-picks');
+        if (counterPicksElement) {
+          counterPicksElement.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'start'
           });
         }
       }, 100);
   
-    } catch (_: unknown) {
-      setSuggestions([{
-        role: 'Error',
-        heroName: 'Error en la solicitud',
-        heroImage: '',
-        reasons: ['Hubo un error procesando tu solicitud. Por favor intenta de nuevo.']
-      }]);
     } finally {
       setLoading(false);
     }
