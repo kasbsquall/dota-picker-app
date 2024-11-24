@@ -20,9 +20,6 @@ interface SynergyResponse {
   suggestions: string;
 }
 
-interface ApiError {
-  message: string;
-}
 
 // Lista de héroes con su nombre y video
 const heroes = [
@@ -642,8 +639,7 @@ const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }
         }
       }, 100);
   
-    } catch (error: unknown) { // Tipado específico para el error
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    } catch (error: unknown) {
       setSuggestions([{
         role: 'Error',
         heroName: 'Error en la solicitud',

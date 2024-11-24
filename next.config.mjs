@@ -2,7 +2,14 @@
 const nextConfig = {
   trailingSlash: true,
   images: {
-    unoptimized: true, // O quitar esto si prefieres usar la optimización de imágenes
+    domains: ['cdn.akamai.steamstatic.com'], // Permite imágenes de Steam
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.akamai.steamstatic.com',
+        pathname: '/apps/dota2/images/**',
+      },
+    ],
   },
 };
 
