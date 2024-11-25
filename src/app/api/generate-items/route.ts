@@ -3,30 +3,41 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 interface Hero {
-    name: string;
-    image: string;
-  }
-  
-  interface Item {
-    name: string;
-    reason: string;
-    image: string;
-  }
-  
-  interface PhaseRecommendation {
-    phase: 'early' | 'mid' | 'late';
-    items: Item[];
-  }
-  
-  interface ItemRecommendations {
-    recommendations: PhaseRecommendation[];
-  }
-  
-  const openai = new OpenAI({
-    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  });
+  name: string;
+  role: string;
+  image: string;
+}
 
-const itemImages = {
+interface Item {
+  name: string;
+  reason: string;
+  image: string;
+}
+
+interface ItemBuild {
+  title: string;
+  description: string;
+  items: {
+    early: Item[];
+    mid: Item[];
+    late: Item[];
+  };
+}
+
+interface ItemRecommendations {
+  builds: ItemBuild[];
+}
+
+// Define el tipo para el objeto itemImages
+type ItemImageDictionary = {
+  [key: string]: string;
+}
+
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+});
+
+const itemImages: ItemImageDictionary = {
     'Abyssal Blade': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/3/3b/Abyssal_Blade_icon.png',
     'Aegis of the Immortal': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/2/20/Aegis_of_the_Immortal_icon.png',
 'Aeon Disk': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/2/2b/Aeon_Disk_icon.png',
@@ -240,114 +251,118 @@ const itemImages = {
 'Wraith Band': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/5/55/Wraith_Band_icon.png',
 'Yasha and Kaya': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/1/19/Yasha_and_Kaya_icon.png',
 'Yasha': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/d/d1/Yasha_icon.png'
-};
+} as const;
+
+// Función auxiliar para obtener la URL de la imagen de forma segura
+function getItemImageUrl(itemName: string): string {
+  const imageUrl = itemImages[itemName];
+  return imageUrl || '/api/placeholder/64/64'; // URL por defecto si no se encuentra la imagen
+}
 
 export async function POST(req: Request) {
-    try {
-      const { hero, enemies } = await req.json();
-  
-      // Validaciones
-      if (!hero?.name) {
-        return NextResponse.json(
-          { error: 'Se requiere un héroe seleccionado' },
-          { status: 400 }
-        );
-      }
-  
-      const enemyNames = enemies
-        .filter((e: Hero | null) => e !== null)
-        .map((e: Hero) => e.name)
-        .join(', ');
-  
-      const prompt = `Como experto analista de Dota 2, proporciona recomendaciones de itemización para ${hero.name}.
-  ${enemyNames ? `Héroes enemigos a considerar: ${enemyNames}` : 'Sin héroes enemigos seleccionados.'}
+  try {
+    const { hero, enemies } = await req.json();
 
-  Solo considera items de la meta y año actual, no items neutrales ni descontinuados.
-  
-  Por cada considera 3 items, ten siempre presente en tus respuestas:
-  1. El rol y mecánicas principales de ${hero.name}
-  2. Items que contrapickeen los enemigos.
-  3. Orden según oro o mejoras, progresión lógica de items según la fase
-  4. Sinergia entre los items recomendados
-  
-  Usa ÚNICAMENTE nombres de items exactos de esta lista:
-  ${Object.keys(itemImages).join(', ')}
-  
-  Formato JSON requerido:
-  {
-    "recommendations": [
-      {
-        "phase": "early",
-        "items": [
-          {
-            "name": "NOMBRE_EXACTO_DEL_ITEM",
-            "reason": "Explicación breve (máximo 100 caracteres)"
-          }
-        ]
-      },
-      {
-        "phase": "mid",
-        "items": []
-      },
-      {
-        "phase": "late",
-        "items": []
-      }
-    ]
-  }`;
-  
-      const response = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 1000,
-      });
-  
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error('No se recibió respuesta del modelo');
-      }
-  
-      try {
-        const recommendations: ItemRecommendations = JSON.parse(content);
-
-        type ItemName = keyof typeof itemImages;
-        interface Item {
-          name: ItemName;  // Cambiamos el tipo de name
-          reason: string;
-          image: string;
-        }
-      
-  
-        // Validar y procesar las recomendaciones
-        const processedRecommendations = recommendations.recommendations.map(phase => ({
-            ...phase,
-            items: phase.items.map(item => {
-              const itemName = item.name as ItemName;
-              const itemImage = itemImages[itemName];
-              if (!itemImage) {
-                console.warn(`Imagen no encontrada para el item: ${itemName}`);
-              }
-              return {
-                ...item,
-                image: itemImage || '/images/items/default.png'
-              };
-            })
-          }));
-  
-        return NextResponse.json({ recommendations: processedRecommendations });
-  
-      } catch (parseError) {
-        console.error('Error al parsear la respuesta:', parseError);
-        throw new Error('Error al procesar las recomendaciones de items');
-      }
-  
-    } catch (error) {
-      console.error('Error en generate-items:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    if (!hero?.name || !hero?.role) {
       return NextResponse.json(
-        { error: `Error al generar recomendaciones: ${errorMessage}` },
-        { status: 500 }
+        { error: 'Hero name and role are required' },
+        { status: 400 }
       );
     }
-  }
+
+    if (!Array.isArray(enemies) || enemies.some((e: Hero | null) => e !== null && (!e.name || !e.role))) {
+      return NextResponse.json(
+        { error: 'Enemies must be an array of valid heroes' },
+        { status: 400 }
+      );
+    }
+
+    const enemyNames = enemies
+      .filter((e: Hero | null) => e !== null)
+      .map((e: Hero) => e.name)
+      .join(', ');
+
+      const prompt = `Como analista profesional de alto nivel de Dota 2, proporciona una única build óptima y refinada para ${hero.name} jugando como ${hero.role}.
+      ${enemyNames ? `Necesitas contrarrestar específicamente a: ${enemyNames}` : 'Sin héroes enemigos seleccionados.'}
+      
+      Considera los siguientes factores para la itemización:
+      - La meta actual del ultimo parche
+      - Contrapicks y sinergias específicas contra el equipo enemigo
+      - Timings de poder del héroe
+      - Objetivos en cada fase del juego
+      - Eficiencia en la progresión de items
+      
+      Proporciona la build en este formato JSON:
+      
+      {
+        "builds": [
+          {
+            "title": "Build Óptima ${hero.name}",
+            "description": "Explicación concisa de la estrategia y objetivos principales de la build",
+            "items": {
+              "early": [
+                {
+                  "name": "NOMBRE_EXACTO_DEL_ITEM",
+                  "reason": "Justificación estratégica del item (máximo 100 caracteres)"
+                }
+              ],
+              "mid": [],
+              "late": []
+            }
+          }
+        ]
+      }
+      
+      IMPORTANTE:
+      1. La build debe maximizar el potencial de ${hero.name} contra la composición enemiga
+      2. Solo considerar items de la meta actual
+      3. Usar solo estos nombres exactos de items: ${Object.keys(itemImages).join(', ')}`;
+
+const response = await openai.chat.completions.create({
+  model: 'gpt-3.5-turbo',
+  messages: [{ role: 'user', content: prompt }],
+  temperature: 0.7,
+  max_tokens: 1000,
+});
+
+const content = response.choices[0].message.content;
+if (!content) {
+  throw new Error('No se recibió respuesta del modelo');
+}
+
+try {
+  const recommendations: ItemRecommendations = JSON.parse(content);
+
+  // Procesar las recomendaciones usando la función auxiliar
+  const processedBuilds = recommendations.builds.map(build => ({
+    ...build,
+    items: {
+      early: build.items.early.map(item => ({
+        ...item,
+        image: getItemImageUrl(item.name)
+      })),
+      mid: build.items.mid.map(item => ({
+        ...item,
+        image: getItemImageUrl(item.name)
+      })),
+      late: build.items.late.map(item => ({
+        ...item,
+        image: getItemImageUrl(item.name)
+      }))
+    }
+  }));
+
+  return NextResponse.json({ builds: processedBuilds });
+} catch (parseError) {
+  console.error('Error al parsear la respuesta:', parseError);
+  throw new Error('Error al procesar las recomendaciones de items');
+}
+} catch (error) {
+console.error('Error en generate-items:', error);
+const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+return NextResponse.json(
+  { error: `Error generating item recommendations: ${errorMessage}` },
+  { status: 500 }
+);
+}
+}

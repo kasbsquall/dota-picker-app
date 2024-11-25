@@ -4,6 +4,8 @@ import { useState } from 'react';
 import RecommendationItem from './RecommendationItem';
 import heroes from './heroList'; // Importa la lista de héroes desde heroList.ts
 import './SynergyPicker.css'; // Importa el CSS específico para este componente
+import HeroGrid from "./HeroGrid";
+
 
 interface RecommendationItemProps {
   role: string;
@@ -250,22 +252,11 @@ const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }
       </div>
       
       {/* Selector de héroes */}
-      <div className="hero-grid">
-  {heroes.map((hero, index) => (
-    <div 
-      key={index} 
-      className={`hero-card ${isHeroSelected(hero) ? 'selected' : ''}`}
-      draggable 
-      onDragStart={(event) => handleDragStart(event, hero)}
-      onClick={() => handleHeroClick(hero)}
-    >
-      <div className="hero-image-container">
-        <img src={hero.image} alt={hero.name} className="hero-image" />
-        <div className="hero-name-overlay">{hero.name}</div>
-      </div>
-    </div>
-  ))}
-</div>
+      <HeroGrid
+  onHeroSelect={handleHeroClick}
+  selectedHeroes={[...allyHeroes, ...enemyHeroes].filter(Boolean)}
+  onDragStart={handleDragStart}
+/>
 
       {/* Selector de rango */}
       <label className="block mt-4 mb-2 font-semibold">Selecciona el nivel de la medalla:</label>

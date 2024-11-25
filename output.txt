@@ -7,6 +7,7 @@ src/
         layout.tsx
         page.tsx
         api/
+            patch-info.ts
             generate-hero/
                 route.ts
             generate-items/
@@ -17,6 +18,7 @@ src/
             GeistMonoVF.woff
             GeistVF.woff
     components/
+        HeroGrid.tsx
         heroList.ts
         HeroPicker.tsx
         ItemizationCalculator.css
@@ -24,6 +26,10 @@ src/
         RecommendationItem.tsx
         SynergyPicker.css
         SynergyPicker.tsx
+    scripts/
+        updatePatches.ts
+    services/
+        patchService.ts
 
 
 File Contents
@@ -79,6 +85,26 @@ select:hover {
   border-color: #888;
 }
 
+.hero-name-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.hero-card:hover .hero-name-overlay {
+  opacity: 1;
+}
+
 button {
   padding: 10px 20px;
   background-color: #007d00;
@@ -111,6 +137,8 @@ button:hover {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
 
 .counter-picks {
   margin-top: 20px;
@@ -217,6 +245,85 @@ html {
   scroll-margin-top: 20px; /* Añade un pequeño margen al scroll para mejor visibilidad */
 }
 
+/* Añade estos estilos a tu globals.css */
+.hero-grid-wrapper {
+  will-change: max-height, opacity;
+}
+
+.collapse-button {
+  background-color: rgba(75, 85, 99, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+}
+
+.collapse-button:hover {
+  background-color: rgba(75, 85, 99, 0.5);
+}
+
+/* Añade estos estilos a tu globals.css */
+
+.grid-expanded {
+  max-height: 2000px; /* Ajusta este valor según el tamaño de tu grid */
+  opacity: 1;
+  margin-bottom: 1rem;
+  visibility: visible;
+}
+
+.grid-collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.collapse-button {
+  background-color: rgba(75, 85, 99, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.collapse-button svg{
+  width: 30px;
+  height: 30px;
+}
+
+.collapse-button:hover {
+  background-color: rgba(75, 85, 99, 0.5);
+}
+
+/* Asegúrate de que .hero-grid mantenga estos estilos */
+.hero-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+}
+
+/* Ajusta la transición para que sea más suave */
+.hero-grid-container > div {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.selected-hero-display{
+  margin-top: 20px;
+}
+
+.hero-grid-container{
+  margin-bottom: 20px;
+}
+
 --------------------------------------------------
 File End
 --------------------------------------------------
@@ -268,49 +375,136 @@ File End
 
 C:\v2dotapicker\dota-picker-app\src\app\page.tsx
 File type: .tsx
+// src/app/page.tsx
 "use client";
 
 import HeroPicker from '@/components/HeroPicker';
 import SynergyPicker from '@/components/SynergyPicker';
 import ItemizationCalculator from '@/components/ItemizationCalculator';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface PatchInfo {
+  version: string;
+  date: string;
+}
 
 export default function Home() {
   const [tool, setTool] = useState<'counter' | 'synergy' | 'itemization' | null>(null);
+  const [latestPatch, setLatestPatch] = useState<PatchInfo | null>(null);
+
+  useEffect(() => {
+    async function fetchLatestPatchData() {
+      try {
+        const response = await fetch('/api/patch-info');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Error al obtener información de parches: ${errorData.error}`);
+        }
+        const data = await response.json();
+        setLatestPatch(data);
+      } catch (error) {
+        console.error('Error al obtener información de parches:', error);
+      }
+    }
+    fetchLatestPatchData();
+  }, []);
+
+  const handleBack = () => {
+    setTool(null);
+  };
 
   return (
     <div className="hero-picker-container flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-5xl font-bold mb-4 text-white">¡Bienvenido a Dota Picker!</h1>
-      <p className="text-lg mb-6 text-center">Selecciona una herramienta para mejorar tu estrategia.</p>
-      
-      {!tool && (
-        <div className="flex space-x-4 flexbloque">
-          <button 
-            className="bg-blue-500 text-white rounded p-4 hover:bg-blue-600 transition" 
-            onClick={() => setTool('counter')}
-          >
-            Counter Picker
-          </button>
-          <button 
-            className="bg-green-500 text-white rounded p-4 hover:bg-green-600 transition" 
-            onClick={() => setTool('synergy')}
-          >
-            Synergy Picker
-          </button>
-          <button 
-            className="bg-purple-500 text-white rounded p-4 hover:bg-purple-600 transition" 
-            onClick={() => setTool('itemization')}
-          >
-            Calculadora de Items
-          </button>
+      {!tool ? (
+        <>
+          <h1 className="text-5xl font-bold mb-4 text-white">¡Bienvenido a Dota Picker!</h1>
+          <p className="text-lg mb-6 text-center">Selecciona una herramienta para mejorar tu estrategia.</p>
+          <div className="flex space-x-4 flexbloque">
+            <button
+              className="bg-blue-500 text-white rounded p-4 hover:bg-blue-600 transition"
+              onClick={() => setTool('counter')}
+            >
+              Counter Picker
+            </button>
+            <button
+              className="bg-green-500 text-white rounded p-4 hover:bg-green-600 transition"
+              onClick={() => setTool('synergy')}
+            >
+              Synergy Picker
+            </button>
+            <button
+              className="bg-purple-500 text-white rounded p-4 hover:bg-purple-600 transition"
+              onClick={() => setTool('itemization')}
+            >
+              Calculadora de Items
+            </button>
+          </div>
+          {latestPatch && (
+            <div className="mt-6 bg-gray-800 rounded-lg p-4">
+              <h3 className="text-lg font-bold mb-2">Última información de parches:</h3>
+              <p>Parche: {latestPatch.version}</p>
+              <p>Fecha: {new Date(latestPatch.date).toLocaleString()}</p>
+              {/* Agrega más detalles que desees mostrar */}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="w-full">
+          <div className="back-button-container">
+            <button onClick={handleBack} className="back-button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="back-arrow"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                />
+              </svg>
+              Volver
+            </button>
+          </div>
+
+          {tool === 'counter' && <HeroPicker />}
+          {tool === 'synergy' && <SynergyPicker />}
+          {tool === 'itemization' && <ItemizationCalculator />}
         </div>
       )}
-
-      {tool === 'counter' && <HeroPicker />}
-      {tool === 'synergy' && <SynergyPicker />}
-      {tool === 'itemization' && <ItemizationCalculator />}
     </div>
   );
+}
+
+--------------------------------------------------
+File End
+--------------------------------------------------
+
+
+C:\v2dotapicker\dota-picker-app\src\app\api\patch-info.ts
+File type: .ts
+// src/app/api/patch-info.ts
+import { NextResponse } from 'next/server';
+import { PatchService } from '@/services/patchService';
+
+export async function GET() {
+  try {
+    const latestPatch = await PatchService.getLatestPatchData();
+    if (!latestPatch) {
+      return NextResponse.json({ error: 'No se pudo obtener información de parches' }, { status: 500 });
+    }
+
+    return NextResponse.json(latestPatch);
+  } catch (error) {
+    console.error('Error al obtener información de parches:', error);
+    return NextResponse.json(
+      { error: 'Error al obtener información de parches' },
+      { status: 500 }
+    );
+  }
 }
 
 --------------------------------------------------
@@ -375,30 +569,42 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 interface Hero {
-    name: string;
-    image: string;
-  }
-  
-  interface Item {
-    name: string;
-    reason: string;
-    image: string;
-  }
-  
-  interface PhaseRecommendation {
-    phase: 'early' | 'mid' | 'late';
-    items: Item[];
-  }
-  
-  interface ItemRecommendations {
-    recommendations: PhaseRecommendation[];
-  }
-  
-  const openai = new OpenAI({
-    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  });
+  name: string;
+  role: string;
+  image: string;
+}
 
-const itemImages = {
+interface Item {
+  name: string;
+  reason: string;
+  image: string;
+}
+
+interface ItemBuild {
+  title: string;
+  description: string;
+  items: {
+    early: Item[];
+    mid: Item[];
+    late: Item[];
+  };
+}
+
+interface ItemRecommendations {
+  builds: ItemBuild[];
+}
+
+// Define el tipo para el objeto itemImages
+type ItemImageDictionary = {
+  [key: string]: string;
+}
+
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+});
+
+const itemImages: ItemImageDictionary = {
+    'Abyssal Blade': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/3/3b/Abyssal_Blade_icon.png',
     'Aegis of the Immortal': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/2/20/Aegis_of_the_Immortal_icon.png',
 'Aeon Disk': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/2/2b/Aeon_Disk_icon.png',
 'Aether Lens': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/d/d4/Aether_Lens_icon.png',
@@ -589,7 +795,6 @@ const itemImages = {
 'Soul Ring': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/a/a6/Soul_Ring_icon.png',
 'Spirit Vessel': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/2/2a/Spirit_Vessel_icon.png',
 'Staff of Wizardry': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/8/8a/Staff_of_Wizardry_icon.png',
-'Stout Shield': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/0/01/Stout_Shield_icon.png',
 'Swift Blink': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/4/47/Swift_Blink_icon.png',
 'Talisman of Evasion': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/3/37/Talisman_of_Evasion_icon.png',
 'Tango (Shared)': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/0/06/Tango_%28Shared%29_icon.png',
@@ -612,115 +817,121 @@ const itemImages = {
 'Wraith Band': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/5/55/Wraith_Band_icon.png',
 'Yasha and Kaya': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/1/19/Yasha_and_Kaya_icon.png',
 'Yasha': 'https://static.wikia.nocookie.net/dota2_gamepedia/images/d/d1/Yasha_icon.png'
-};
+} as const;
+
+// Función auxiliar para obtener la URL de la imagen de forma segura
+function getItemImageUrl(itemName: string): string {
+  const imageUrl = itemImages[itemName];
+  return imageUrl || '/api/placeholder/64/64'; // URL por defecto si no se encuentra la imagen
+}
 
 export async function POST(req: Request) {
-    try {
-      const { hero, enemies } = await req.json();
-  
-      // Validaciones
-      if (!hero?.name) {
-        return NextResponse.json(
-          { error: 'Se requiere un héroe seleccionado' },
-          { status: 400 }
-        );
-      }
-  
-      const enemyNames = enemies
-        .filter((e: Hero | null) => e !== null)
-        .map((e: Hero) => e.name)
-        .join(', ');
-  
-      const prompt = `Como experto analista de Dota 2, proporciona recomendaciones de itemización para ${hero.name}.
-  ${enemyNames ? `Héroes enemigos a considerar: ${enemyNames}` : 'Sin héroes enemigos seleccionados.'}
-  
-  Proporciona exactamente 3 items para cada fase del juego, considerando:
-  1. El rol y mecánicas principales de ${hero.name}
-  2. Counter items contra los enemigos seleccionados
-  3. Progresión lógica de items según la fase
-  4. Sinergia entre los items recomendados
-  
-  Usa ÚNICAMENTE nombres de items exactos de esta lista:
-  ${Object.keys(itemImages).join(', ')}
-  
-  Formato JSON requerido:
-  {
-    "recommendations": [
-      {
-        "phase": "early",
-        "items": [
-          {
-            "name": "NOMBRE_EXACTO_DEL_ITEM",
-            "reason": "Explicación breve (máximo 100 caracteres)"
-          }
-        ]
-      },
-      {
-        "phase": "mid",
-        "items": []
-      },
-      {
-        "phase": "late",
-        "items": []
-      }
-    ]
-  }`;
-  
-      const response = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 1000,
-      });
-  
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error('No se recibió respuesta del modelo');
-      }
-  
-      try {
-        const recommendations: ItemRecommendations = JSON.parse(content);
+  try {
+    const { hero, enemies } = await req.json();
 
-        type ItemName = keyof typeof itemImages;
-        interface Item {
-          name: ItemName;  // Cambiamos el tipo de name
-          reason: string;
-          image: string;
-        }
-      
-  
-        // Validar y procesar las recomendaciones
-        const processedRecommendations = recommendations.recommendations.map(phase => ({
-            ...phase,
-            items: phase.items.map(item => {
-              const itemName = item.name as ItemName;
-              const itemImage = itemImages[itemName];
-              if (!itemImage) {
-                console.warn(`Imagen no encontrada para el item: ${itemName}`);
-              }
-              return {
-                ...item,
-                image: itemImage || '/images/items/default.png'
-              };
-            })
-          }));
-  
-        return NextResponse.json({ recommendations: processedRecommendations });
-  
-      } catch (parseError) {
-        console.error('Error al parsear la respuesta:', parseError);
-        throw new Error('Error al procesar las recomendaciones de items');
-      }
-  
-    } catch (error) {
-      console.error('Error en generate-items:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    if (!hero?.name || !hero?.role) {
       return NextResponse.json(
-        { error: `Error al generar recomendaciones: ${errorMessage}` },
-        { status: 500 }
+        { error: 'Hero name and role are required' },
+        { status: 400 }
       );
     }
-  }
+
+    if (!Array.isArray(enemies) || enemies.some((e: Hero | null) => e !== null && (!e.name || !e.role))) {
+      return NextResponse.json(
+        { error: 'Enemies must be an array of valid heroes' },
+        { status: 400 }
+      );
+    }
+
+    const enemyNames = enemies
+      .filter((e: Hero | null) => e !== null)
+      .map((e: Hero) => e.name)
+      .join(', ');
+
+      const prompt = `Como analista profesional de alto nivel de Dota 2, proporciona una única build óptima y refinada para ${hero.name} jugando como ${hero.role}.
+      ${enemyNames ? `Necesitas contrarrestar específicamente a: ${enemyNames}` : 'Sin héroes enemigos seleccionados.'}
+      
+      Considera los siguientes factores para la itemización:
+      - La meta actual del ultimo parche
+      - Contrapicks y sinergias específicas contra el equipo enemigo
+      - Timings de poder del héroe
+      - Objetivos en cada fase del juego
+      - Eficiencia en la progresión de items
+      
+      Proporciona la build en este formato JSON:
+      
+      {
+        "builds": [
+          {
+            "title": "Build Óptima ${hero.name}",
+            "description": "Explicación concisa de la estrategia y objetivos principales de la build",
+            "items": {
+              "early": [
+                {
+                  "name": "NOMBRE_EXACTO_DEL_ITEM",
+                  "reason": "Justificación estratégica del item (máximo 100 caracteres)"
+                }
+              ],
+              "mid": [],
+              "late": []
+            }
+          }
+        ]
+      }
+      
+      IMPORTANTE:
+      1. La build debe maximizar el potencial de ${hero.name} contra la composición enemiga
+      2. Solo considerar items de la meta actual
+      3. Usar solo estos nombres exactos de items: ${Object.keys(itemImages).join(', ')}`;
+
+const response = await openai.chat.completions.create({
+  model: 'gpt-3.5-turbo',
+  messages: [{ role: 'user', content: prompt }],
+  temperature: 0.7,
+  max_tokens: 1000,
+});
+
+const content = response.choices[0].message.content;
+if (!content) {
+  throw new Error('No se recibió respuesta del modelo');
+}
+
+try {
+  const recommendations: ItemRecommendations = JSON.parse(content);
+
+  // Procesar las recomendaciones usando la función auxiliar
+  const processedBuilds = recommendations.builds.map(build => ({
+    ...build,
+    items: {
+      early: build.items.early.map(item => ({
+        ...item,
+        image: getItemImageUrl(item.name)
+      })),
+      mid: build.items.mid.map(item => ({
+        ...item,
+        image: getItemImageUrl(item.name)
+      })),
+      late: build.items.late.map(item => ({
+        ...item,
+        image: getItemImageUrl(item.name)
+      }))
+    }
+  }));
+
+  return NextResponse.json({ builds: processedBuilds });
+} catch (parseError) {
+  console.error('Error al parsear la respuesta:', parseError);
+  throw new Error('Error al procesar las recomendaciones de items');
+}
+} catch (error) {
+console.error('Error en generate-items:', error);
+const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+return NextResponse.json(
+  { error: `Error generating item recommendations: ${errorMessage}` },
+  { status: 500 }
+);
+}
+}
 
 --------------------------------------------------
 File End
@@ -844,6 +1055,97 @@ File End
 --------------------------------------------------
 
 
+C:\v2dotapicker\dota-picker-app\src\components\HeroGrid.tsx
+File type: .tsx
+// src/components/HeroGrid.tsx
+import { useState } from 'react';
+import Image from 'next/image';
+import heroes from './heroList';
+
+interface Hero {
+  name: string;
+  image: string;
+}
+
+interface HeroGridProps {
+  onHeroSelect: (hero: Hero) => void;
+  selectedHeroes: (Hero | null)[];
+  onDragStart?: (event: React.DragEvent<HTMLDivElement>, hero: Hero) => void;
+}
+
+const HeroGrid = ({ onHeroSelect, selectedHeroes, onDragStart }: HeroGridProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const isHeroSelected = (hero: Hero) => {
+    return selectedHeroes.some(
+      selectedHero => selectedHero && selectedHero.name === hero.name
+    );
+  };
+
+  return (
+    <div className="hero-grid-container">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="collapse-button flex items-center gap-2 mb-4 text-gray-300 hover:text-white transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+        {isExpanded ? 'Ocultar Lista de Héroes' : 'Mostrar Lista de Héroes'}
+      </button>
+
+      <div
+        className={`transition-all duration-300 ease-in-out ${
+          isExpanded ? 'grid-expanded' : 'grid-collapsed'
+        }`}
+      >
+        <div className="hero-grid">
+          {heroes.map((hero, index) => (
+            <div
+              key={index}
+              className={`hero-card ${isHeroSelected(hero) ? 'selected' : ''}`}
+              onClick={() => onHeroSelect(hero)}
+              draggable={onDragStart ? true : false}
+              onDragStart={(e) => onDragStart && onDragStart(e, hero)}
+            >
+              <div className="hero-image-container relative">
+                <Image
+                  src={hero.image}
+                  alt={hero.name}
+                  width={60}
+                  height={60}
+                  className="hero-image"
+                />
+                <div className="hero-name-overlay opacity-0 absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white text-sm transition-opacity duration-200 hover:opacity-100">
+                  {hero.name}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HeroGrid;
+
+--------------------------------------------------
+File End
+--------------------------------------------------
+
+
 C:\v2dotapicker\dota-picker-app\src\components\heroList.ts
 File type: .ts
 const heroes = [
@@ -853,7 +1155,7 @@ const heroes = [
     },
     {
       name: 'Alchemist',
-      image: './images/mini/alchemist.png',
+      image: '/images/mini/alchemist.png',
     },
     {
       name: 'Ancient Apparition',
@@ -861,7 +1163,7 @@ const heroes = [
     },
     {
       name: 'Anti-Mage',
-      image: './images/mini/antimage.png',
+      image: '/images/mini/antimage.png',
     },
     {
       name: 'Arc Warden',
@@ -869,11 +1171,11 @@ const heroes = [
     },
     {
       name: 'Axe',
-      image: './images/mini/axe.png',
+      image: '/images/mini/axe.png',
     },
     {
       name: 'Bane',
-      image: './images/mini/bane.png',
+      image: '/images/mini/bane.png',
     },
     {
       name: 'Batrider',
@@ -917,7 +1219,7 @@ const heroes = [
     },
     {
       name: 'Clinkz',
-      image: './images/mini/clinkz.png',
+      image: '/images/mini/clinkz.png',
     },
     {
       name: 'Clockwerk',
@@ -981,7 +1283,7 @@ const heroes = [
     },
     {
       name: 'Enigma',
-      image: './images/mini/enigma.png',
+      image: '/images/mini/enigma.png',
     },
     {
       name: 'Faceless Void',
@@ -1001,15 +1303,15 @@ const heroes = [
     },
     {
       name: 'Huskar',
-      image: './images/mini/huskar.png',
+      image: '/images/mini/huskar.png',
     },
     {
       name: 'Invoker',
-      image: './images/mini/invoker.png',
+      image: '/images/mini/invoker.png',
     },
     {
       name: 'Io',
-      image: './images/mini/wisp.png',
+      image: '/images/mini/wisp.png',
     },
     {
       name: 'Jakiro',
@@ -1025,7 +1327,7 @@ const heroes = [
     },
     {
       name: 'Kunkka',
-      image: './images/mini/kunkka.png',
+      image: '/images/mini/kunkka.png',
     },
     {
       name: 'Legion Commander',
@@ -1045,7 +1347,7 @@ const heroes = [
     },
     {
       name: 'Lina',
-      image: './images/mini/lina.png',
+      image: '/images/mini/lina.png',
     },
     {
       name: 'Lion',
@@ -1057,7 +1359,7 @@ const heroes = [
     },
     {
       name: 'Luna',
-      image: './images/mini/luna.png',
+      image: '/images/mini/luna.png',
     },
     {
       name: 'Lycan',
@@ -1081,7 +1383,7 @@ const heroes = [
     },
     {
       name: 'Meepo',
-      image: './images/mini/meepo.png',
+      image: '/images/mini/meepo.png',
     },
     {
       name: 'Mirana',
@@ -1105,7 +1407,7 @@ const heroes = [
     },
     {
       name: "Nature's Prophet",
-      image: './images/mini/furion.png',
+      image: '/images/mini/furion.png',
     },
     {
       name: 'Necrophos',
@@ -1157,15 +1459,15 @@ const heroes = [
   },
   {
   name: 'Puck',
-  image: './images/mini/puck.png',
+  image: '/images/mini/puck.png',
   },
   {
   name: 'Pudge',
-  image: './images/mini/pudge.png',
+  image: '/images/mini/pudge.png',
   },
   {
   name: 'Pugna',
-  image: './images/mini/pugna.png',
+  image: '/images/mini/pugna.png',
   },
   {
   name: 'Queen of Pain',
@@ -1181,7 +1483,7 @@ const heroes = [
   },
   {
   name: 'Rubick',
-  image: './images/mini/rubick.png',
+  image: '/images/mini/rubick.png',
   },
   {
   name: 'Sand King',
@@ -1221,7 +1523,7 @@ const heroes = [
   },
   {
   name: 'Sniper',
-  image: './images/mini/sniper.png',
+  image: '/images/mini/sniper.png',
   },
   {
   name: 'Spectre',
@@ -1241,11 +1543,11 @@ const heroes = [
   },
   {
   name: 'Techies',
-  image: './images/mini/techies.png',
+  image: '/images/mini/techies.png',
   },
   {
   name: 'Templar Assassin',
-  image: './images/mini/templar_assassin.png',
+  image: '/images/mini/templar_assassin.png',
   },
   {
   name: 'Terrorblade',
@@ -1253,7 +1555,7 @@ const heroes = [
   },
   {
   name: 'Tidehunter',
-  image: './images/mini/tidehunter.png',
+  image: '/images/mini/tidehunter.png',
   },
   {
   name: 'Timbersaw',
@@ -1265,7 +1567,7 @@ const heroes = [
   },
   {
   name: 'Tiny',
-  image: './images/mini/tiny.png',
+  image: '/images/mini/tiny.png',
   },
   {
   name: 'Treant Protector',
@@ -1289,7 +1591,7 @@ const heroes = [
   },
   {
   name: 'Ursa',
-  image: './images/mini/ursa.png',
+  image: '/images/mini/ursa.png',
   },
   {
   name: 'Vengeful Spirit',
@@ -1297,11 +1599,11 @@ const heroes = [
   },
   {
   name: 'Venomancer',
-  image: './images/mini/venomancer.png',
+  image: '/images/mini/venomancer.png',
   },
   {
   name: 'Viper',
-  image: './images/mini/viper.png',
+  image: '/images/mini/viper.png',
   },
   {
   name: 'Visage',
@@ -1321,7 +1623,7 @@ const heroes = [
   },
   {
   name: 'Windranger',
-  image: './images/mini/windrunner.png',
+  image: '/images/mini/windrunner.png',
   },
   {
   name: 'Winter Wyvern',
@@ -1350,49 +1652,54 @@ File End
 
 C:\v2dotapicker\dota-picker-app\src\components\HeroPicker.tsx
 File type: .tsx
-// src/app/components/HeroPicker.tsx
+// src/components/HeroPicker.tsx
 "use client";
 
-import { useState } from 'react';
-import heroes from './heroList';
+import { useState } from "react";
+import HeroGrid from "./HeroGrid";
 
-const positions = [
-  'Carry',
-  'Offlaner',
-  'Support',
-  'Hard Support',
-  'Midlaner',
-];
+interface Hero {
+  name: string;
+  image: string;
+}
+
+const positions = ["Carry", "Offlaner", "Support", "Hard Support", "Midlaner"];
 
 const HeroPicker = () => {
-  const [selectedHero, setSelectedHero] = useState(''); // Héroe seleccionado
-  const [selectedPosition, setSelectedPosition] = useState(positions[0]); // Posición seleccionada
-  const [counterPicks, setCounterPicks] = useState('');
-  const [error, setError] = useState('');
+  const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState(positions[0]);
+  const [counterPicks, setCounterPicks] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleHeroSelect = (hero: Hero) => {
+    setSelectedHero(hero);
+  };
 
   const handleHeroSelection = async () => {
     if (!selectedHero || !selectedPosition) {
-      setError('Debes seleccionar un héroe y una posición.');
+      setError("Debes seleccionar un héroe y una posición.");
       return;
     }
-    setError('');
+    setError("");
     setLoading(true);
 
-    const response = await fetch('/api/generate-hero', {
-      method: 'POST',
+    const response = await fetch("/api/generate-hero", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userHeroSelection: selectedHero, position: selectedPosition }),
+      body: JSON.stringify({
+        userHeroSelection: selectedHero.name,
+        position: selectedPosition,
+      }),
     });
 
     setLoading(false);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error(errorData.error);
-      setError(errorData.error || 'Error desconocido');
+      setError(errorData.error || "Error desconocido");
       return;
     }
 
@@ -1403,55 +1710,67 @@ const HeroPicker = () => {
   return (
     <div className="p-4">
       <h2 className="block mb-4 font-semibold">Selecciona un héroe:</h2>
-      <div className="hero-grid">
-  {heroes.map((hero, index) => (
-    <div key={index} className={`hero-card ${selectedHero === hero.name ? 'selected' : ''}`} onClick={() => setSelectedHero(hero.name)}>
-      <img
-        src={hero.image}
-        alt={hero.name}
-        className="hero-image"
+
+      {/* Hero Grid Component */}
+      <HeroGrid
+        onHeroSelect={handleHeroSelect}
+        selectedHeroes={selectedHero ? [selectedHero] : []}
       />
-      <p>{hero.name}</p>
-    </div>
-  ))}
-</div>
-
-
 
       {/* Selección de posición */}
-      <label htmlFor="positionSelect" className="block mt-4 mb-2 font-semibold">Selecciona tu posición:</label>
+      <label htmlFor="positionSelect" className="block mt-4 mb-2 font-semibold">
+        Selecciona tu posición:
+      </label>
       <select
         id="positionSelect"
         value={selectedPosition}
         onChange={(e) => setSelectedPosition(e.target.value)}
-        className="mb-4 border rounded p-2"
+        className="mb-4 border rounded p-2 bg-gray-700 text-white"
       >
         {positions.map((position) => (
-          <option key={position} value={position}>{position}</option>
+          <option key={position} value={position}>
+            {position}
+          </option>
         ))}
       </select>
 
       {/* Botón para obtener héroes counter */}
       <button
         onClick={handleHeroSelection}
-        className="mb-4 bg-blue-500 text-white rounded p-2 hover:bg-blue-600 transition"
+        disabled={!selectedHero}
+        className={`mb-4 bg-blue-500 text-white rounded p-2 hover:bg-blue-600 transition ${
+          !selectedHero ? "opacity-50 cursor-not-allowed" : ""
+        }`}
       >
         Obtener héroes counter
       </button>
 
-      {/* Indicador de carga */}
+            {/* Mostrar héroe seleccionado */}
+            {selectedHero && (
+        <div className="selected-hero-display mt-4 mb-4 p-3 bg-gray-800 rounded-lg flex items-center gap-3">
+          <span className="text-white">
+            Héroe seleccionado: <b>{selectedHero.name}</b>
+          </span>
+        </div>
+      )}
+
       {loading && <div className="loader"></div>}
 
-      {/* Mensajes de error */}
       {error && <p className="text-red-500">{error}</p>}
+
+
 
       {/* Mostrar héroes counter */}
       {counterPicks && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">Counter Pickers que te recomiendo:</h2>
-          <ul className="list-disc pl-5">
-            {counterPicks.split('\n').map((pick, index) => (
-              <li key={index} className="mb-2">{pick.trim()}</li>
+        <div className="mt-4 p-4 bg-gray-800 rounded-lg">
+          <h2 className="text-lg font-semibold mb-3">
+            Counter Pickers recomendados:
+          </h2>
+          <ul className="space-y-2">
+            {counterPicks.split("\n").map((pick, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span>{pick.trim()}</span>
+              </li>
             ))}
           </ul>
         </div>
@@ -1470,16 +1789,14 @@ File End
 
 C:\v2dotapicker\dota-picker-app\src\components\ItemizationCalculator.css
 File type: .css
+/* src/components/ItemizationCalculator.css */
 .itemization-calculator {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
   }
   
-  .main-hero-section,
-  .enemy-heroes-section {
-    margin-bottom: 2rem;
-  }
+
   
   .enemy-slots {
     display: flex;
@@ -1523,30 +1840,78 @@ File type: .css
     margin-bottom: 0.5rem;
   }
   
-  .remove-button {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    background: #ff4444;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
+
+  
+  .recommendations-container {
+    background: rgba(17, 17, 17, 0.7);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+  
+  .build-card {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(75, 75, 75, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .build-card:hover {
+    border-color: rgba(74, 222, 128, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  .item-tooltip-container .tooltip {
+    transition: all 0.2s ease;
+    min-width: 200px;
+    font-size: 0.875rem;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    backdrop-filter: blur(12px);
+  }
+  
+  .items-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+    gap: 8px;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .builds-grid {
+      flex-direction: column;
+    }
+  
+    .build-card {
+      max-width: 100%;
+    }
+  }
+  
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   .recommendations-container {
-    margin-top: 2rem;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    animation: fadeIn 0.3s ease-out;
   }
   
+  /* Mejoras de accesibilidad */
+  .item-tooltip-container img:focus {
+    outline: 2px solid rgb(74, 222, 128);
+    outline-offset: 2px;
+  }
+  
+  /* Tema oscuro optimizado */
+  @media (prefers-color-scheme: dark) {
+    .build-card {
+      background: rgba(17, 24, 39, 0.8);
+    }
+    
+    .tooltip {
+      background: rgba(17, 24, 39, 0.95);
+    }
+  }
+
   .phase-container {
     margin-bottom: 2rem;
   }
@@ -1618,6 +1983,227 @@ File type: .css
     }
   }
 
+  .hero-grid {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: repeat(12, minmax(90px, 1fr));
+    margin-bottom: 20px;
+  }
+  
+  .hero-card {
+    background-color: rgba(27, 27, 27, 0.8);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    height: fit-content;
+    cursor: pointer;
+    transition: transform 0.2s, border 0.2s;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .hero-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .hero-card.selected {
+    filter: grayscale(100%) opacity(0.5);
+    pointer-events: none;
+  }
+  
+  .hero-name {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #ffffff;
+  }
+  
+  .hero-image {
+    width: 100%;
+    height: 60px;
+    object-fit: cover;
+  }
+  
+  @media (max-width: 600px) {
+    .hero-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  
+    .hero-name {
+      font-size: 14px;
+    }
+  
+    .hero-image-container {
+      height: 40px !important;
+    }
+  
+    .hero-image {
+      width: 100%;
+      height: 40px;
+      object-fit: cover;
+    }
+  }
+  
+  .hero-card p {
+    margin-block-start: 4px;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    margin-block-end: 4px;
+  }
+
+  .bloquetotal-item{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-around;
+  }
+
+  .remove-button{
+    align-self: center;
+  }
+
+  .main-hero{
+    max-width: 110px;
+      background: linear-gradient(0deg, rgb(47 47 47) 0%, rgb(21 21 24) 100%);
+      border: 2px solid #353535;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex
+  ;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+  }
+
+  .main-hero .flex{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .enemy-slots .hero-slot{
+    max-width: 110px;
+  }
+
+.selectorali{
+  margin-bottom: 4px !important;
+}
+
+  .hero-slot{
+    min-height: 180px;
+    gap: 4px;
+  }
+
+  .build-container {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .build-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #00ff00;
+  }
+  
+  .build-description {
+    margin-bottom: 1rem;
+    color: #ffffff;
+  }
+  
+  .phase-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .phase-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #00ff00;
+  }
+  
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .item-card {
+    background-color: #1e1e1e;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .item-image {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 0.5rem;
+  }
+  
+  .item-card h5 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: #ffffff;
+  }
+  
+  .item-card p {
+    font-size: 0.875rem;
+    color: #c0c0c0;
+  }
+
+  .phases-grid{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: 40px;
+  }
+
+  .phase-section{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 33.3%;
+  }
+
+  .items-container{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .build-card{
+    padding: 20px;
+    border-radius: 20px;
+    background: #1c1c1c;
+  }
+
+  .phase-section img{
+    height: 80px;
+  }
+
+  .item-tooltip-container .tooltip{
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .phase-title {
+    margin-top: 5px;
+  }
+
+  .item-tooltip-container .text-sm{
+    min-height: 60px;
+  }
+
+  .mb-1{
+    font-weight: 700;
+  }
+
 --------------------------------------------------
 File End
 --------------------------------------------------
@@ -1625,61 +2211,231 @@ File End
 
 C:\v2dotapicker\dota-picker-app\src\components\ItemizationCalculator.tsx
 File type: .tsx
-"use client";
+// src/components/ItemizationCalculator.tsx
+import { useState } from "react";
+import heroes from "./heroList";
+import "./ItemizationCalculator.css";
+import HeroGrid from './HeroGrid';
 
-import { useState } from 'react';
-import heroes from './heroList';
-import './ItemizationCalculator.css';
+interface ItemRecommendationsProps {
+  recommendations: ItemRecommendations;
+  selectedHero: Hero | null;
+  enemyHeroes: (Hero | null)[];
+}
 
 interface Hero {
   name: string;
   image: string;
+  role?: string; // Añadimos el rol como opcional
 }
 
-interface ItemRecommendation {
-  phase: 'early' | 'mid' | 'late';
-  items: {
-    name: string;
-    reason: string;
-    image: string;
-  }[];
+interface Item {
+  name: string;
+  reason: string;
+  image: string;
 }
+
+interface ItemBuild {
+  title: string;
+  description: string;
+  items: {
+    early: Item[];
+    mid: Item[];
+    late: Item[];
+  };
+}
+
+interface ItemRecommendations {
+  builds: ItemBuild[];
+}
+
+const BuildCard = ({ build }: { build: ItemBuild }) => {
+  return (
+    <div className="build-card bg-gray-800 rounded-lg p-4 flex-1 min-w-[300px] max-w-[400px]">
+      <div className="build-header mb-4">
+        <h4 className="text-xl font-bold text-green-400">{build.title}</h4>
+        <p className="text-sm text-gray-300">{build.description}</p>
+      </div>
+
+      <div className="phases-grid">
+        {["early", "mid", "late"].map((phase) => (
+          <div key={phase} className="phase-section mb-4">
+            <h5 className="phase-title text-sm font-semibold text-green-400 mb-2">
+              {phase === "early"
+                ? "Fase Inicial"
+                : phase === "mid"
+                ? "Fase Media"
+                : "Fase Tardía"}
+            </h5>
+            <div className="items-container flex flex-wrap gap-2">
+              {build.items[phase as keyof typeof build.items].map(
+                (item, idx) => (
+                  <div
+                    key={idx}
+                    className="item-tooltip-container relative group"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 rounded border border-gray-600 hover:border-green-400 transition-all cursor-help"
+                    />
+                    <div className="tooltip opacity-0 group-hover:opacity-100 absolute z-10 left-1/2 -bottom-2 transform -translate-x-1/2 translate-y-full bg-gray-900 text-white p-2 rounded shadow-lg w-48 pointer-events-none transition-opacity">
+                      <p className="font-semibold text-green-400 mb-1">
+                        {item.name}
+                      </p>
+                      <p className="text-sm">{item.reason}</p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ItemRecommendations: React.FC<ItemRecommendationsProps> = ({
+  recommendations,
+  selectedHero,
+  enemyHeroes,
+}) => {
+  const build = recommendations.builds[0]; // Solo tomamos la primera build
+  return (
+    <div className="recommendations-container">
+      <div className="recommendations-header mb-6">
+        <div>
+          <h3 className="text-2xl font-bold text-white mb-2">
+            Build Óptima para {selectedHero?.name} ({selectedHero?.role})
+          </h3>
+          {enemyHeroes.some((h: Hero | null) => h !== null) && (
+            <p className="text-sm text-gray-400">
+              Contra: {enemyHeroes.filter(h => h !== null).map(h => h?.name).join(', ')}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="build-card bg-gray-800 rounded-lg p-6">
+        <div className="build-header mb-6">
+          <p className="text-gray-300 text-sm">{build.description}</p>
+        </div>
+
+        <div className="phases-grid space-y-6">
+          {["early", "mid", "late"].map((phase) => (
+            <div key={phase} className="phase-section">
+              <h5 className="phase-title text-sm font-semibold text-green-400 mb-3">
+                {phase === "early"
+                  ? "Fase Inicial"
+                  : phase === "mid"
+                  ? "Fase Media"
+                  : "Fase Tardía"}
+              </h5>
+              <div className="items-container flex flex-wrap gap-3">
+                {build.items[phase as keyof typeof build.items].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="item-tooltip-container relative group"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-12 h-12 rounded border border-gray-600 hover:border-green-400 transition-all cursor-help"
+                    />
+                    <div className="tooltip opacity-0 group-hover:opacity-100 absolute z-10 left-1/2 -bottom-2 transform -translate-x-1/2 translate-y-full bg-gray-900 text-white p-2 rounded shadow-lg w-48 pointer-events-none transition-opacity">
+                      <p className="font-semibold text-green-400 mb-1">
+                        {item.name}
+                      </p>
+                      <p className="text-sm">{item.reason}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+const roles = ["Hard Support", "Support", "Midlaner", "Carry", "Offlaner"];
 
 const ItemizationCalculator = () => {
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
-  const [enemyHeroes, setEnemyHeroes] = useState<(Hero | null)[]>(Array(5).fill(null));
-  const [recommendations, setRecommendations] = useState<ItemRecommendation[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>("Carry"); // Añadimos estado para el rol
+  const [enemyHeroes, setEnemyHeroes] = useState<(Hero | null)[]>(
+    Array(5).fill(null)
+  );
+  const [recommendations, setRecommendations] = useState<ItemRecommendations>({
+    builds: [],
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedSlot, setSelectedSlot] = useState<number>(-1);
 
-  const handleHeroSelect = (hero: Hero) => {
-    setSelectedHero(hero);
-  };
-  
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, hero: Hero) => {
-    event.dataTransfer.setData('heroName', hero.name);
-    event.dataTransfer.setData('heroImage', hero.image);
+  const handleDragStart = (
+    event: React.DragEvent<HTMLDivElement>,
+    hero: Hero
+  ) => {
+    event.dataTransfer.setData("heroName", hero.name);
+    event.dataTransfer.setData("heroImage", hero.image);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleDrop = (
+    event: React.DragEvent<HTMLDivElement>,
+    type: "main" | "enemy",
+    index?: number
+  ) => {
     event.preventDefault();
-    const heroName = event.dataTransfer.getData('heroName');
-    const heroImage = event.dataTransfer.getData('heroImage');
-    const hero = { name: heroName, image: heroImage };
+    const heroName = event.dataTransfer.getData("heroName");
+    const heroImage = event.dataTransfer.getData("heroImage");
+    const hero = {
+      name: heroName,
+      image: heroImage,
+      role: type === "main" ? selectedRole : roles[index || 0], // Asignamos el rol
+    };
 
-    const newEnemies = [...enemyHeroes];
-    newEnemies[index] = hero;
-    setEnemyHeroes(newEnemies);
+    if (type === "main") {
+      setSelectedHero(hero);
+    } else if (type === "enemy" && index !== undefined) {
+      const newEnemies = [...enemyHeroes];
+      newEnemies[index] = hero;
+      setEnemyHeroes(newEnemies);
+    }
   };
 
-  const handleRemoveEnemy = (index: number) => {
-    const newEnemies = [...enemyHeroes];
-    newEnemies[index] = null;
-    setEnemyHeroes(newEnemies);
+  const handleRemoveHero = (type: "main" | "enemy", index?: number) => {
+    if (type === "main") {
+      setSelectedHero(null);
+    } else if (type === "enemy" && index !== undefined) {
+      const newEnemies = [...enemyHeroes];
+      newEnemies[index] = null;
+      setEnemyHeroes(newEnemies);
+    }
+  };
+
+  const handleSlotClick = (index: number) => {
+    setSelectedSlot(selectedSlot === index ? -1 : index);
+  };
+
+  const isHeroSelected = (hero: Hero) => {
+    return (
+      selectedHero?.name === hero.name ||
+      enemyHeroes.some((enemyHero) => enemyHero?.name === hero.name)
+    );
+  };
+
+  const handleHeroClick = (hero: Hero) => {
+    if (selectedSlot !== -1) {
+      const newEnemies = [...enemyHeroes];
+      newEnemies[selectedSlot] = hero;
+      setEnemyHeroes(newEnemies);
+      setSelectedSlot(-1);
+    }
   };
 
   const handleSubmit = async () => {
@@ -1688,29 +2444,32 @@ const ItemizationCalculator = () => {
     try {
       setLoading(true);
 
-      const response = await fetch('/api/generate-items', {
-        method: 'POST',
+      const heroWithRole = {
+        ...selectedHero,
+        role: selectedRole, // Aseguramos que el héroe tenga un rol
+      };
+
+      const response = await fetch("/api/generate-items", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          hero: selectedHero,
+          hero: heroWithRole,
           enemies: enemyHeroes,
         }),
       });
 
-      const data = await response.json();
-      setRecommendations(data.recommendations);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error desconocido");
+      }
 
-      setTimeout(() => {
-        const recommendationsElement = document.querySelector('.recommendations-container');
-        if (recommendationsElement) {
-          recommendationsElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
-        }
-      }, 100);
+      const data = await response.json();
+      setRecommendations(data);
+    } catch (error) {
+      console.error("Error:", error);
+      // Aquí puedes manejar el error, por ejemplo mostrándolo en la UI
     } finally {
       setLoading(false);
     }
@@ -1720,85 +2479,109 @@ const ItemizationCalculator = () => {
     <div className="p-4 itemization-calculator">
       <h2 className="text-2xl font-bold mb-6">Calculadora de Itemización</h2>
 
-      {/* Selección de héroe principal */}
-      <div className="main-hero-section">
-        <h3 className="text-xl mb-4">Tu Héroe</h3>
-        <div className="hero-slot main-hero">
-          {selectedHero ? (
-            <div className="selected-hero">
-              <img src={selectedHero.image} alt={selectedHero.name} className="hero-image" />
-              <p>{selectedHero.name}</p>
-              <button onClick={() => setSelectedHero(null)} className="remove-button">
-                ×
-              </button>
-            </div>
-          ) : (
-            <p className="empty-slot">Selecciona tu héroe</p>
-          )}
-        </div>
-      </div>
-
-     {/* Selección de héroes enemigos */}
-     <div className="enemy-heroes-section">
-        <h3 className="text-xl mb-4">Héroes Enemigos</h3>
-        <div className="enemy-slots">
-          {enemyHeroes.map((hero, index) => (
-            <div
-              key={index}
-              className={`hero-slot ${selectedSlot === index ? 'selected' : ''}`}
-              onDragOver={handleDragOver}
-              onDrop={(event) => handleDrop(event, index)}
-            >
-              {hero ? (
-                <div className="selected-hero">
-                  <img src={hero.image} alt={hero.name} className="hero-image" />
-                  <p>{hero.name}</p>
-                  <button onClick={() => handleRemoveEnemy(index)} className="remove-button">
-                    ×
-                  </button>
-                </div>
-              ) : (
-                <p className="empty-slot">Enemigo {index + 1}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-       {/* Grid de héroes */}
-      <div className="hero-grid">
-        {heroes.map((hero, index) => (
-          <div
-            key={index}
-            className={`hero-card ${
-              (selectedHero?.name === hero.name || enemyHeroes.some((h) => h?.name === hero.name))
-                ? 'selected'
-                : ''
-            }`}
-            draggable
-            onDragStart={(event) => handleDragStart(event, hero)}
-            onClick={() => {
-              if (selectedSlot === -1) {
-                handleHeroSelect(hero);
-              } else {
-                const newEnemies = [...enemyHeroes];
-                newEnemies[selectedSlot] = hero;
-                setEnemyHeroes(newEnemies);
-                setSelectedSlot(-1);
-              }
-            }}
+      <div className="bloquetotal-item">
+        {/* Selección de héroe principal */}
+        <div className="main-hero-section">
+          <h2 className="block mb-4 font-semibold center">Tu Héroe</h2>
+          {/* Añadimos selector de rol */}
+          <select
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+            className="mb-4 border rounded p-2 selectorali"
           >
-            <img src={hero.image} alt={hero.name} className="hero-image" />
-            <div className="hero-name-overlay">{hero.name}</div>
+            {roles.map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+          <div
+            className="main-hero"
+            onDragOver={handleDragOver}
+            onDrop={(event) => handleDrop(event, "main")}
+            onClick={() => handleSlotClick(-1)}
+          >
+
+            {selectedHero ? (
+              <div className="flex flex-col items-center">
+                <img
+                  src={selectedHero.image}
+                  alt={selectedHero.name}
+                  className="hero-image"
+                />
+                <button
+                  onClick={() => handleRemoveHero("main")}
+                  className="remove-button"
+                >
+                  X
+                </button>
+              </div>
+            ) : (
+              <p className="empty-slot">Selecciona tu héroe</p>
+            )}
           </div>
-        ))}
+        </div>
+
+        {/* Selección de héroes enemigos */}
+        <div className="enemy-heroes-section">
+          <h2 className="block mb-4 font-semibold center">Héroes Enemigos</h2>
+          <div className="enemy-slots">
+            {enemyHeroes.map((hero, index) => (
+              <div
+                key={index}
+                className={`hero-slot ${
+                  selectedSlot === index ? "selected" : ""
+                }`}
+                onDragOver={handleDragOver}
+                onDrop={(event) => handleDrop(event, "enemy", index)}
+                onClick={() => handleSlotClick(index)}
+              >
+                <p>{roles[index]}</p>
+                {hero ? (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={hero.image}
+                      alt={hero.name}
+                      className="hero-image"
+                    />
+                    <button
+                      onClick={() => handleRemoveHero("enemy", index)}
+                      className="remove-button"
+                    >
+                      X
+                    </button>
+                  </div>
+                ) : (
+                  <p className="empty-slot">Selecciona héroe</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Grid de héroes */}
+<HeroGrid
+  onHeroSelect={(hero) => {
+    if (selectedSlot !== -1) {
+      const newEnemies = [...enemyHeroes];
+      newEnemies[selectedSlot] = hero;
+      setEnemyHeroes(newEnemies);
+      setSelectedSlot(-1);
+    }
+  }}
+  selectedHeroes={[selectedHero, ...enemyHeroes].filter(Boolean)}
+  onDragStart={(event, hero) => {
+    event.dataTransfer.setData("heroName", hero.name);
+    event.dataTransfer.setData("heroImage", hero.image);
+  }}
+/>
 
       {/* Botón para generar recomendaciones */}
       <button
         onClick={handleSubmit}
         disabled={!selectedHero}
-        className={`submit-button ${!selectedHero ? 'disabled' : ''}`}
+        className={`submit-button ${!selectedHero ? "disabled" : ""}`}
       >
         Generar Recomendaciones de Items
       </button>
@@ -1806,36 +2589,19 @@ const ItemizationCalculator = () => {
       {loading && <div className="loader"></div>}
 
       {/* Mostrar recomendaciones */}
-      {recommendations.length > 0 && (
-        <div className="recommendations-container">
-          <h3 className="text-xl font-bold mb-4">Recomendaciones de Items</h3>
-          {recommendations.map((phase, index) => (
-            <div key={index} className="phase-container">
-              <h4 className="phase-title">
-                {phase.phase === 'early'
-                  ? 'Fase Inicial (0-10 min)'
-                  : phase.phase === 'mid'
-                  ? 'Fase Media (10-25 min)'
-                  : 'Fase Tardía (25+ min)'}
-              </h4>
-              <div className="items-grid">
-                {phase.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="item-card">
-                    <img src={item.image} alt={item.name} className="item-image" />
-                    <h5>{item.name}</h5>
-                    <p>{item.reason}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      {recommendations?.builds?.length > 0 && (
+        <ItemRecommendations
+          recommendations={recommendations}
+          selectedHero={selectedHero}
+          enemyHeroes={enemyHeroes}
+        />
       )}
     </div>
   );
 };
 
 export default ItemizationCalculator;
+
 
 --------------------------------------------------
 File End
@@ -1951,25 +2717,7 @@ File type: .css
   height: 60px;
 }
 
-.hero-name-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 14px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
 
-.hero-card:hover .hero-name-overlay {
-  opacity: 1;
-}
 
 .hero-item {
   text-align: center; /* Centrar el texto del héroe */
@@ -2089,6 +2837,8 @@ import { useState } from 'react';
 import RecommendationItem from './RecommendationItem';
 import heroes from './heroList'; // Importa la lista de héroes desde heroList.ts
 import './SynergyPicker.css'; // Importa el CSS específico para este componente
+import HeroGrid from "./HeroGrid";
+
 
 interface RecommendationItemProps {
   role: string;
@@ -2105,7 +2855,6 @@ interface Hero {
 interface SynergyResponse {
   suggestions: string;
 }
-
 
 const roles = [
   'Hard Support', 'Support', 'Midlaner', 'Carry', 'Offlaner'
@@ -2336,22 +3085,11 @@ const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }
       </div>
       
       {/* Selector de héroes */}
-      <div className="hero-grid">
-  {heroes.map((hero, index) => (
-    <div 
-      key={index} 
-      className={`hero-card ${isHeroSelected(hero) ? 'selected' : ''}`}
-      draggable 
-      onDragStart={(event) => handleDragStart(event, hero)}
-      onClick={() => handleHeroClick(hero)}
-    >
-      <div className="hero-image-container">
-        <img src={hero.image} alt={hero.name} className="hero-image" />
-        <div className="hero-name-overlay">{hero.name}</div>
-      </div>
-    </div>
-  ))}
-</div>
+      <HeroGrid
+  onHeroSelect={handleHeroClick}
+  selectedHeroes={[...allyHeroes, ...enemyHeroes].filter(Boolean)}
+  onDragStart={handleDragStart}
+/>
 
       {/* Selector de rango */}
       <label className="block mt-4 mb-2 font-semibold">Selecciona el nivel de la medalla:</label>
@@ -2397,6 +3135,102 @@ const [selectedSlot, setSelectedSlot] = useState<{ type: string; index: number }
 
 export default SynergyPicker;
 
+
+--------------------------------------------------
+File End
+--------------------------------------------------
+
+
+C:\v2dotapicker\dota-picker-app\src\scripts\updatePatches.ts
+File type: .ts
+import { PatchService } from '../services/patchService';
+
+async function main() {
+  try {
+    console.log('Obteniendo información de los últimos parches...');
+    
+    const latestPatch = await PatchService.getLatestPatchData();
+    
+    if (latestPatch) {
+      console.log('\nÚltimo parche encontrado:');
+      console.log('------------------------');
+      console.log(`Versión: ${latestPatch.version}`);
+      console.log('Fecha: No disponible');
+      console.log('------------------------\n');
+    } else {
+      console.log('No se encontró información de parches');
+    }
+  } catch (error) {
+    console.error('Error al obtener información de parches:');
+    console.error('----------------------------');
+    if (error instanceof Error) {
+      console.error(`Tipo de error: ${error.name}`);
+      console.error(`Mensaje: ${error.message}`);
+    } else {
+      console.error('Error desconocido:', error);
+    }
+    console.error('----------------------------');
+    process.exit(1);
+  }
+}
+
+main()
+  .then(() => console.log('Proceso completado'))
+  .catch(error => {
+    console.error('Error fatal:', error);
+    process.exit(1);
+  });
+
+--------------------------------------------------
+File End
+--------------------------------------------------
+
+
+C:\v2dotapicker\dota-picker-app\src\services\patchService.ts
+File type: .ts
+// src/services/patchService.ts
+import axios from 'axios';
+
+interface PatchInfo {
+  version: string;
+  date: Date;
+}
+
+export class PatchService {
+  private static async fetchPatchData(url: string): Promise<PatchInfo | null> {
+    try {
+      const response = await axios.get(url);
+      const data = response.data;
+
+      return {
+        version: data.version,
+        date: new Date(data.date),
+      };
+    } catch (error) {
+      console.error(`Error fetching patch data from ${url}:`, error);
+      return null;
+    }
+  }
+
+  static async getLatestPatchData(): Promise<PatchInfo | null> {
+    const patchUrls = [
+      'https://www.dota2.com/datafeed/patchnotes?version=7.37e',
+      'https://www.dota2.com/datafeed/patchnotes?version=7.37d',
+      'https://www.dota2.com/datafeed/patchnotes?version=7.37c',
+      'https://www.dota2.com/datafeed/patchnotes?version=7.37b',
+      'https://www.dota2.com/datafeed/patchnotes?version=7.37',
+    ];
+
+    for (const url of patchUrls) {
+      const patchData = await this.fetchPatchData(url);
+      if (patchData) {
+        return patchData;
+      }
+    }
+
+    return null;
+  }
+}
 
 --------------------------------------------------
 File End

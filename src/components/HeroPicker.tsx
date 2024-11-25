@@ -1,46 +1,51 @@
-// src/app/components/HeroPicker.tsx
+// src/components/HeroPicker.tsx
 "use client";
 
-import { useState } from 'react';
-import heroes from './heroList';
+import { useState } from "react";
+import HeroGrid from "./HeroGrid";
 
-const positions = [
-  'Carry',
-  'Offlaner',
-  'Support',
-  'Hard Support',
-  'Midlaner',
-];
+interface Hero {
+  name: string;
+  image: string;
+}
+
+const positions = ["Carry", "Offlaner", "Support", "Hard Support", "Midlaner"];
 
 const HeroPicker = () => {
-  const [selectedHero, setSelectedHero] = useState(''); // Héroe seleccionado
-  const [selectedPosition, setSelectedPosition] = useState(positions[0]); // Posición seleccionada
-  const [counterPicks, setCounterPicks] = useState('');
-  const [error, setError] = useState('');
+  const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState(positions[0]);
+  const [counterPicks, setCounterPicks] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleHeroSelect = (hero: Hero) => {
+    setSelectedHero(hero);
+  };
 
   const handleHeroSelection = async () => {
     if (!selectedHero || !selectedPosition) {
-      setError('Debes seleccionar un héroe y una posición.');
+      setError("Debes seleccionar un héroe y una posición.");
       return;
     }
-    setError('');
+    setError("");
     setLoading(true);
 
-    const response = await fetch('/api/generate-hero', {
-      method: 'POST',
+    const response = await fetch("/api/generate-hero", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userHeroSelection: selectedHero, position: selectedPosition }),
+      body: JSON.stringify({
+        userHeroSelection: selectedHero.name,
+        position: selectedPosition,
+      }),
     });
 
     setLoading(false);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error(errorData.error);
-      setError(errorData.error || 'Error desconocido');
+      setError(errorData.error || "Error desconocido");
       return;
     }
 
@@ -51,55 +56,67 @@ const HeroPicker = () => {
   return (
     <div className="p-4">
       <h2 className="block mb-4 font-semibold">Selecciona un héroe:</h2>
-      <div className="hero-grid">
-  {heroes.map((hero, index) => (
-    <div key={index} className={`hero-card ${selectedHero === hero.name ? 'selected' : ''}`} onClick={() => setSelectedHero(hero.name)}>
-      <img
-        src={hero.image}
-        alt={hero.name}
-        className="hero-image"
+
+      {/* Hero Grid Component */}
+      <HeroGrid
+        onHeroSelect={handleHeroSelect}
+        selectedHeroes={selectedHero ? [selectedHero] : []}
       />
-      <p>{hero.name}</p>
-    </div>
-  ))}
-</div>
-
-
 
       {/* Selección de posición */}
-      <label htmlFor="positionSelect" className="block mt-4 mb-2 font-semibold">Selecciona tu posición:</label>
+      <label htmlFor="positionSelect" className="block mt-4 mb-2 font-semibold">
+        Selecciona tu posición:
+      </label>
       <select
         id="positionSelect"
         value={selectedPosition}
         onChange={(e) => setSelectedPosition(e.target.value)}
-        className="mb-4 border rounded p-2"
+        className="mb-4 border rounded p-2 bg-gray-700 text-white"
       >
         {positions.map((position) => (
-          <option key={position} value={position}>{position}</option>
+          <option key={position} value={position}>
+            {position}
+          </option>
         ))}
       </select>
 
       {/* Botón para obtener héroes counter */}
       <button
         onClick={handleHeroSelection}
-        className="mb-4 bg-blue-500 text-white rounded p-2 hover:bg-blue-600 transition"
+        disabled={!selectedHero}
+        className={`mb-4 bg-blue-500 text-white rounded p-2 hover:bg-blue-600 transition ${
+          !selectedHero ? "opacity-50 cursor-not-allowed" : ""
+        }`}
       >
         Obtener héroes counter
       </button>
 
-      {/* Indicador de carga */}
+            {/* Mostrar héroe seleccionado */}
+            {selectedHero && (
+        <div className="selected-hero-display mt-4 mb-4 p-3 bg-gray-800 rounded-lg flex items-center gap-3">
+          <span className="text-white">
+            Héroe seleccionado: <b>{selectedHero.name}</b>
+          </span>
+        </div>
+      )}
+
       {loading && <div className="loader"></div>}
 
-      {/* Mensajes de error */}
       {error && <p className="text-red-500">{error}</p>}
+
+
 
       {/* Mostrar héroes counter */}
       {counterPicks && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">Counter Pickers que te recomiendo:</h2>
-          <ul className="list-disc pl-5">
-            {counterPicks.split('\n').map((pick, index) => (
-              <li key={index} className="mb-2">{pick.trim()}</li>
+        <div className="mt-4 p-4 bg-gray-800 rounded-lg">
+          <h2 className="text-lg font-semibold mb-3">
+            Counter Pickers recomendados:
+          </h2>
+          <ul className="space-y-2">
+            {counterPicks.split("\n").map((pick, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span>{pick.trim()}</span>
+              </li>
             ))}
           </ul>
         </div>

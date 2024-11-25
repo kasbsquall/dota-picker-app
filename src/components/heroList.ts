@@ -5,7 +5,7 @@ const heroes = [
     },
     {
       name: 'Alchemist',
-      image: './images/mini/alchemist.png',
+      image: '/images/mini/alchemist.png',
     },
     {
       name: 'Ancient Apparition',
@@ -13,7 +13,7 @@ const heroes = [
     },
     {
       name: 'Anti-Mage',
-      image: './images/mini/antimage.png',
+      image: '/images/mini/antimage.png',
     },
     {
       name: 'Arc Warden',
@@ -21,11 +21,11 @@ const heroes = [
     },
     {
       name: 'Axe',
-      image: './images/mini/axe.png',
+      image: '/images/mini/axe.png',
     },
     {
       name: 'Bane',
-      image: './images/mini/bane.png',
+      image: '/images/mini/bane.png',
     },
     {
       name: 'Batrider',
@@ -69,7 +69,7 @@ const heroes = [
     },
     {
       name: 'Clinkz',
-      image: './images/mini/clinkz.png',
+      image: '/images/mini/clinkz.png',
     },
     {
       name: 'Clockwerk',
@@ -133,7 +133,7 @@ const heroes = [
     },
     {
       name: 'Enigma',
-      image: './images/mini/enigma.png',
+      image: '/images/mini/enigma.png',
     },
     {
       name: 'Faceless Void',
@@ -153,15 +153,15 @@ const heroes = [
     },
     {
       name: 'Huskar',
-      image: './images/mini/huskar.png',
+      image: '/images/mini/huskar.png',
     },
     {
       name: 'Invoker',
-      image: './images/mini/invoker.png',
+      image: '/images/mini/invoker.png',
     },
     {
       name: 'Io',
-      image: './images/mini/wisp.png',
+      image: '/images/mini/wisp.png',
     },
     {
       name: 'Jakiro',
@@ -177,7 +177,7 @@ const heroes = [
     },
     {
       name: 'Kunkka',
-      image: './images/mini/kunkka.png',
+      image: '/images/mini/kunkka.png',
     },
     {
       name: 'Legion Commander',
@@ -197,7 +197,7 @@ const heroes = [
     },
     {
       name: 'Lina',
-      image: './images/mini/lina.png',
+      image: '/images/mini/lina.png',
     },
     {
       name: 'Lion',
@@ -209,7 +209,7 @@ const heroes = [
     },
     {
       name: 'Luna',
-      image: './images/mini/luna.png',
+      image: '/images/mini/luna.png',
     },
     {
       name: 'Lycan',
@@ -233,7 +233,7 @@ const heroes = [
     },
     {
       name: 'Meepo',
-      image: './images/mini/meepo.png',
+      image: '/images/mini/meepo.png',
     },
     {
       name: 'Mirana',
@@ -257,7 +257,7 @@ const heroes = [
     },
     {
       name: "Nature's Prophet",
-      image: './images/mini/furion.png',
+      image: '/images/mini/furion.png',
     },
     {
       name: 'Necrophos',
@@ -309,15 +309,15 @@ const heroes = [
   },
   {
   name: 'Puck',
-  image: './images/mini/puck.png',
+  image: '/images/mini/puck.png',
   },
   {
   name: 'Pudge',
-  image: './images/mini/pudge.png',
+  image: '/images/mini/pudge.png',
   },
   {
   name: 'Pugna',
-  image: './images/mini/pugna.png',
+  image: '/images/mini/pugna.png',
   },
   {
   name: 'Queen of Pain',
@@ -333,7 +333,7 @@ const heroes = [
   },
   {
   name: 'Rubick',
-  image: './images/mini/rubick.png',
+  image: '/images/mini/rubick.png',
   },
   {
   name: 'Sand King',
@@ -373,7 +373,7 @@ const heroes = [
   },
   {
   name: 'Sniper',
-  image: './images/mini/sniper.png',
+  image: '/images/mini/sniper.png',
   },
   {
   name: 'Spectre',
@@ -393,11 +393,11 @@ const heroes = [
   },
   {
   name: 'Techies',
-  image: './images/mini/techies.png',
+  image: '/images/mini/techies.png',
   },
   {
   name: 'Templar Assassin',
-  image: './images/mini/templar_assassin.png',
+  image: '/images/mini/templar_assassin.png',
   },
   {
   name: 'Terrorblade',
@@ -405,7 +405,7 @@ const heroes = [
   },
   {
   name: 'Tidehunter',
-  image: './images/mini/tidehunter.png',
+  image: '/images/mini/tidehunter.png',
   },
   {
   name: 'Timbersaw',
@@ -417,7 +417,7 @@ const heroes = [
   },
   {
   name: 'Tiny',
-  image: './images/mini/tiny.png',
+  image: '/images/mini/tiny.png',
   },
   {
   name: 'Treant Protector',
@@ -441,7 +441,7 @@ const heroes = [
   },
   {
   name: 'Ursa',
-  image: './images/mini/ursa.png',
+  image: '/images/mini/ursa.png',
   },
   {
   name: 'Vengeful Spirit',
@@ -449,11 +449,11 @@ const heroes = [
   },
   {
   name: 'Venomancer',
-  image: './images/mini/venomancer.png',
+  image: '/images/mini/venomancer.png',
   },
   {
   name: 'Viper',
-  image: './images/mini/viper.png',
+  image: '/images/mini/viper.png',
   },
   {
   name: 'Visage',
@@ -473,7 +473,7 @@ const heroes = [
   },
   {
   name: 'Windranger',
-  image: './images/mini/windrunner.png',
+  image: '/images/mini/windrunner.png',
   },
   {
   name: 'Winter Wyvern',
