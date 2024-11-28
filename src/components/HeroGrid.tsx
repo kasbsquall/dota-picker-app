@@ -1,5 +1,5 @@
 // src/components/HeroGrid.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import heroes from './heroList';
 
@@ -16,6 +16,16 @@ interface HeroGridProps {
 
 const HeroGrid = ({ onHeroSelect, selectedHeroes, onDragStart }: HeroGridProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredHeroes = heroes.filter((hero) =>
+    hero.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const isHeroSelected = (hero: Hero) => {
     return selectedHeroes.some(
@@ -45,14 +55,22 @@ const HeroGrid = ({ onHeroSelect, selectedHeroes, onDragStart }: HeroGridProps) 
         </svg>
         {isExpanded ? 'Ocultar Lista de Héroes' : 'Mostrar Lista de Héroes'}
       </button>
-
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Buscar héroe..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="search-input"
+        />
+      </div>
       <div
         className={`transition-all duration-300 ease-in-out ${
           isExpanded ? 'grid-expanded' : 'grid-collapsed'
         }`}
       >
         <div className="hero-grid">
-          {heroes.map((hero, index) => (
+        {filteredHeroes.map((hero, index) => (
             <div
               key={index}
               className={`hero-card ${isHeroSelected(hero) ? 'selected' : ''}`}
